@@ -101,7 +101,7 @@ deploy:
   type: git
   message: update
   # repo: root@39.107.104.252:~/blog,master
-  repo: https://github.com/zzzhim/blog.git
+  repo: https://github.com/zzzhim/hexo_blog.git
   branch: page
 
 # Hexo-generator-search 搜索
