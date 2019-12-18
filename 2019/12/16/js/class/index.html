@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    JS的类 |  
+  </title>
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+  
+<script src="/js/pace.min.js"></script>
+
+
+  
+
+  
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    <main class="content">
+      <section class="outer">
+  <article id="es6-js/class" class="article article-type-es6" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  JS的类
+</h1>
+  
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2019/12/16/js/class/" class="article-date">
+  <time datetime="2019-12-16T12:48:06.000Z" itemprop="datePublished">2019-12-16</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+      <h1 id="JS的类"><a href="#JS的类" class="headerlink" title="JS的类"></a>JS的类</h1><h3 id="ES5-中的仿类结构"><a href="#ES5-中的仿类结构" class="headerlink" title="ES5 中的仿类结构"></a>ES5 中的仿类结构</h3><p>在ES5以及更早版本之前，JS是不存在类的。与类最接近的是：创建一个构造器，然后将方法指派到该构造器的原型上。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">PersonType</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.name = name</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PersonType.prototype.sayName = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> person = <span class="keyword">new</span> PersonType(<span class="string">"zzzhim"</span>)</span><br><span class="line">person.sayName() <span class="comment">// zzzhim</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person <span class="keyword">instanceof</span> PersonType) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(person <span class="keyword">instanceof</span> <span class="built_in">Object</span>)     <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><code>PersonType</code> 是一个构造器函数，创建了 <code>name</code> 属性。 <code>sayName()</code> 方法被我们挂载在原型上，<code>PersonType</code> 对象的所有实例都会共享此方法。当我们使用 <code>new</code> 运算符创建了 <code>PersonType</code> 的新实例 <code>person</code> ，此对象会被认为是一个通过原型继承了 <code>PersonType</code> 与 <code>Object</code> 的实例。</p>
+<h3 id="基本的类声明"><a href="#基本的类声明" class="headerlink" title="基本的类声明"></a>基本的类声明</h3><p>在 <strong>ES6</strong> 中我们可以通过 <code>class</code> 声明创建一个基于原型继承的具有指定名称的新类。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PersonClass</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 等价于 PersonType 构造器</span></span><br><span class="line">    <span class="keyword">constructor</span>(name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等价于 PersonType.prototype.sayName</span></span><br><span class="line">    sayName() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> person = <span class="keyword">new</span> PersonClass(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">person.sayName() <span class="comment">// zzzhim</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person <span class="keyword">instanceof</span> PersonClass) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(person <span class="keyword">instanceof</span> <span class="built_in">Object</span>)     <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass) <span class="comment">// function</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass.prototype.sayName) <span class="comment">// function</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>自有属性（ <strong>Own properties</strong> ）：该属性出现在实例上而不是原型上，只能在类的构造器或方法内部进行创建。在本例中， <code>name</code> 就是一个自有属性。我建议应在构造器函数内创建所有可能出现的自有属性，这样在类中声明变量就会被限制在单一位置（有助于代码检查）。</p>
+</blockquote>
+<p>?&gt; 相对于已有的自定义类型声明方式来说，类声明仅仅是以它为基础的一个语法糖。 <code>PersonClass</code> 声明实际上创建了一个拥有 <code>constructor</code> 方法及其行为的函数，这也是 <code>typeof PersonClass</code> 会得到 <code>function</code> 结果的原因。 <code>sayName()</code> 方法最终也成为 <code>PersonClass.prototype</code> 上的一个方法。</p>
+<h3 id="为什么要使用类的语法"><a href="#为什么要使用类的语法" class="headerlink" title="为什么要使用类的语法"></a>为什么要使用类的语法</h3><p>尽管类与自定义类型之间有相似性，但仍然有一些重要的区别：</p>
+<ol>
+<li>类生命不会被提升，而函数定义则相反。类声明的行为与 <code>let</code> 相似，因此在程序的执行到达声明处之前，类会存在<strong>暂时性死区</strong>内。</li>
+<li>类声明中的所有代码会自动运行在严格模式下，并且也无法退出严格模式。</li>
+<li>类的所有方法都是不可枚举的，这是和自定义类型的显著变化，后者必须使用 <code>Object.defineProperty()</code> 才能将方法改变为不可枚举。</li>
+<li>类的所有方法内部都没有 <code>[[Construct]]</code> ，因此使用 <code>new</code> 来调用它们会抛出错误。</li>
+<li>调用类构造器时不使用 <code>new</code> ，会抛出错误。</li>
+<li>试图在类的方法内部重写类名，会抛出错误。</li>
+</ol>
+<p>上例中的 <code>PersonClass</code> 声明实际上就直接等价于以下未使用类语法的代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> PersonClass = <span class="function">(<span class="params">(</span>) =&gt;</span> &#123;</span><br><span class="line"><span class="meta">    "use strict"</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> PersonClass = <span class="function"><span class="keyword">function</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 查看函数是否使用了 new</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">typeof</span> <span class="keyword">new</span>.target === <span class="string">"undefined"</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">"Constructor must be called with new."</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">Object</span>.defineProperty(PersonClass.prototype, <span class="string">"sayName"</span>, &#123;</span><br><span class="line">        value() &#123;</span><br><span class="line">            <span class="comment">// 确保函数调用时 没有使用 new</span></span><br><span class="line">            <span class="keyword">if</span>(<span class="keyword">typeof</span> <span class="keyword">new</span>.target !== <span class="string">"undefined"</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">"Method cannot be called with new."</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 设置为不可枚举</span></span><br><span class="line">        enumerable: <span class="literal">false</span>,</span><br><span class="line">        writable: <span class="literal">true</span>,</span><br><span class="line">        configurable: <span class="literal">true</span></span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> PersonClass</span><br><span class="line">&#125;)()</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> person = <span class="keyword">new</span> PersonClass(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">person.sayName() <span class="comment">// zzzhim</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person <span class="keyword">instanceof</span> PersonClass) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(person <span class="keyword">instanceof</span> <span class="built_in">Object</span>)     <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass) <span class="comment">// function</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass.prototype.sayName) <span class="comment">// function</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>只有在类的内部，类名才被视为是使用 <code>const</code> 声明。这意味着我们可以在外部重写类名，但是不能在类的方法内部这么做。例如：</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>() &#123;</span><br><span class="line">        Person = <span class="string">"cat"</span> <span class="comment">// 执行时抛错</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 正常运行</span></span><br><span class="line">Person = <span class="string">"cat"</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此代码中，类构造器内部的 <code>Person</code> 与 类外部的 <code>Person</code> 是不同的绑定。内部的就像是 <code>const</code> 声明定义的，而外部的就像是 <code>let</code> 声明定义的。</p>
+</blockquote>
+<h3 id="类表达式"><a href="#类表达式" class="headerlink" title="类表达式"></a>类表达式</h3><p>类与函数相似之处，它们都有两种形式：声明与表达式。函数声明与类声明都以适当的关键字为起始（分别是 <code>function</code> 与 <code>class</code>），随后是标识符（即函数名或类名）。函数具有一种表达式形式，无须在 <code>function</code> 后面使用标识符；类似的，类也有不需要标识符的表达式形式。</p>
+<h3 id="基本的类表达式"><a href="#基本的类表达式" class="headerlink" title="基本的类表达式"></a>基本的类表达式</h3><p>我们可以用类表达式的方式，声明一个 <code>PersonClass</code> 。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> PersonClass = <span class="class"><span class="keyword">class</span>  </span>&#123;</span><br><span class="line">    <span class="comment">// 等价于 PersonType 构造器</span></span><br><span class="line">    <span class="keyword">constructor</span>(name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等价于 PersonType.prototype.sayName</span></span><br><span class="line">    sayName() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> person = <span class="keyword">new</span> PersonClass(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">person.sayName() <span class="comment">// zzzhim</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person <span class="keyword">instanceof</span> PersonClass) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(person <span class="keyword">instanceof</span> <span class="built_in">Object</span>)     <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass) <span class="comment">// function</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass.prototype.sayName) <span class="comment">// function</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>相对于函数声明与函数表达式之间的区别，类声明与类表达式都不会被提升。</p>
+</blockquote>
+<h3 id="具名类表达式"><a href="#具名类表达式" class="headerlink" title="具名类表达式"></a>具名类表达式</h3><p>我们可以像函数表达式那样，也可以为类表达式命名。为此需要在 <code>class</code> 关键字后添加标识符，就像这样：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> PersonClass1 = <span class="class"><span class="keyword">class</span> <span class="title">PersonClass2</span> </span>&#123;</span><br><span class="line">     <span class="comment">// 等价于 PersonType 构造器</span></span><br><span class="line">    <span class="keyword">constructor</span>(name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等价于 PersonType.prototype.sayName</span></span><br><span class="line">    sayName() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"------"</span>)</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass2) <span class="comment">// function</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"------"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> person = <span class="keyword">new</span> PersonClass1(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">person.sayName() <span class="comment">// zzzhim</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass1) <span class="comment">// function</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass2) <span class="comment">// undefined</span></span><br></pre></td></tr></table></figure>
+
+<p>此例中 <code>PersonClass2</code> 标识符只在类定义内部存在，因此只能在类方法内部访问到。在类的外部，<code>typeof PersonClass2</code> 的结果为 <code>undefined</code> 。参考下面代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> PersonClass1 = <span class="function">(<span class="params">(</span>) =&gt;</span> &#123;</span><br><span class="line"><span class="meta">    "use strict"</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> PersonClass2 = <span class="function"><span class="keyword">function</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">typeof</span> <span class="keyword">new</span>.target === <span class="string">"undefined"</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">"Constructor must be called with new."</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">Object</span>.defineProperty(PersonClass2.prototype, <span class="string">"sayName"</span>, &#123;</span><br><span class="line">        value() &#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="keyword">typeof</span> <span class="keyword">new</span>.target !== <span class="string">"undefined"</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">"Method cannot be called with new."</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">"------"</span>)</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass2) <span class="comment">// function</span></span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">"------"</span>)</span><br><span class="line">        &#125;,</span><br><span class="line">        enumerable: <span class="literal">false</span>,</span><br><span class="line">        writable: <span class="literal">true</span>,</span><br><span class="line">        configurable: <span class="literal">true</span></span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> PersonClass2</span><br><span class="line">&#125;)()</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> person = <span class="keyword">new</span> PersonClass1(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">person.sayName() <span class="comment">// zzzhim</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass1) <span class="comment">// function</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> PersonClass2) <span class="comment">// undefined</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="JS-中的一级公民"><a href="#JS-中的一级公民" class="headerlink" title="JS 中的一级公民"></a>JS 中的一级公民</h3><p>在编程中，能被当作值来使用的就称为一级公民（<strong>first-class citizen</strong>），意味着它能作为参数传给函数、能作为函数返回值、能用来给变量赋值。JS中的函数就是一级公民（它们有时又被称为一级函数）。在 ES6 中，类（<strong>class</strong>）同样是一级公民。</p>
+<h3 id="访问器属性"><a href="#访问器属性" class="headerlink" title="访问器属性"></a>访问器属性</h3><p>自有属性需要在类构造器中创建，类还允许我们在原型上定义访问器属性。创建 <strong>getter</strong> 和 <strong>setter</strong> ， 只需使用 <code>get</code> 和 <code>set</code> 关键字。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PersonClass</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>() &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = <span class="string">"person"</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">get</span> sayName() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">set</span> sayName(value) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = value</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> person = <span class="keyword">new</span> PersonClass()</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person.sayName) <span class="comment">// person</span></span><br><span class="line"></span><br><span class="line">person.sayName = <span class="string">"zzzhim"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person.sayName) <span class="comment">// zzzhim</span></span><br></pre></td></tr></table></figure>
+
+<p>非类的等价表示，如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> PersonClass = <span class="function">(<span class="params">(</span>) =&gt;</span> &#123;</span><br><span class="line"><span class="meta">    "use strict"</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> PersonClass = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">typeof</span> <span class="keyword">new</span>.target === <span class="string">"undefined"</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">"Method cannot be called with new."</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.name = <span class="string">"person"</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">Object</span>.defineProperty(PersonClass.prototype, <span class="string">"sayName"</span>, &#123;</span><br><span class="line">        enumerable: <span class="literal">false</span>,</span><br><span class="line">        configurable: <span class="literal">true</span>,</span><br><span class="line">        <span class="keyword">get</span>() &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.name</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="keyword">set</span>(value) &#123;</span><br><span class="line">            <span class="keyword">this</span>.name = value</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> PersonClass</span><br><span class="line">&#125;)()</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> person = <span class="keyword">new</span> PersonClass()</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person.sayName) <span class="comment">// person</span></span><br><span class="line"></span><br><span class="line">person.sayName = <span class="string">"zzzhim"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person.sayName) <span class="comment">// zzzhim</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="需计算的成员名"><a href="#需计算的成员名" class="headerlink" title="需计算的成员名"></a>需计算的成员名</h3><p>类方法与类访问器属性也都能使用需计算的名称。语法相同与对象字面量中的需计算名称：无须使用标识符，而是用中括号来包裹一个表达式。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> sayName = <span class="string">"sayName"</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PersonClass</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    [sayName]() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> person = <span class="keyword">new</span> PersonClass(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">person[sayName]() <span class="comment">// zzzhim</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="生成器方法"><a href="#生成器方法" class="headerlink" title="生成器方法"></a>生成器方法</h3><p>想要在类上面定义一个生成器，只需要在方法名称前附加一个星号（<code>*</code>）。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PersonClass</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>() &#123;</span><br><span class="line">        <span class="keyword">this</span>.num = <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    *sayNum() &#123;</span><br><span class="line">        <span class="keyword">yield</span> ++<span class="keyword">this</span>.num</span><br><span class="line">        <span class="keyword">yield</span> ++<span class="keyword">this</span>.num</span><br><span class="line">        <span class="keyword">yield</span> ++<span class="keyword">this</span>.num</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> person = <span class="keyword">new</span> PersonClass(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> iterator = person.sayNum()</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(iterator.next()) <span class="comment">// &#123;value: 1, done: false&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(iterator.next()) <span class="comment">// &#123;value: 2, done: false&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(iterator.next()) <span class="comment">// &#123;value: 3, done: false&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(iterator.next()) <span class="comment">// &#123;value: undefined, done: true&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="静态成员"><a href="#静态成员" class="headerlink" title="静态成员"></a>静态成员</h3><p>直接在构造器上添加额外的方法来模拟静态成员，这在ES5以及更早版本是另一个通用的模式。例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">PersonType</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.name = name</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 静态方法</span></span><br><span class="line">PersonType.create = <span class="function"><span class="keyword">function</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> PersonType(name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实例方法</span></span><br><span class="line">PersonType.prototype.sayName = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> person = PersonType.create(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">person.sayName() <span class="comment">// zzzhim</span></span><br></pre></td></tr></table></figure>
+
+<p>工厂方法 <code>PersonType.create()</code> 会被认定为一个静态方法，它的数据不依赖 <code>PersonType</code> 的任何实例。 ES6 的类简化了静态成员的创建，只要在方法与访问器属性的名称前添加正式的 <code>static</code> 标注。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PersonClass</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 等价于 PersonType 构造器</span></span><br><span class="line">    <span class="keyword">constructor</span>(name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等价于 PersonType.prototype.sayName</span></span><br><span class="line">    sayName() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等价于 PersonType.create</span></span><br><span class="line">    <span class="keyword">static</span> create(name) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> PersonClass(name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> person = PersonClass.create(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">person.sayName() <span class="comment">// zzzhim</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>静态成员不能用实例来访问，你始终需要直接用类自身来访问它们。</p>
+</blockquote>
+<h3 id="使用派生类进行继承"><a href="#使用派生类进行继承" class="headerlink" title="使用派生类进行继承"></a>使用派生类进行继承</h3><p>ES6 之前，实现一个自定义类型的继承是一个很繁琐的过程。而 ES6 为我们提供了 <code>extends</code> 关键字，大大的简化了这个过程。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sayName() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> child = <span class="keyword">new</span> Child(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">child.sayName() <span class="comment">// zzzhim</span></span><br></pre></td></tr></table></figure>
+
+<p>继承了其他类的类被称为派生类（ <strong>derived classes</strong> ）。如果派生类指定了构造器，就需要<br>使用 <code>super()</code> ，否则会造成错误。若你选择不使用构造器， <code>super()</code> 方法会被自动调用，<br>并会使用创建新实例时提供的所有参数。</p>
+<blockquote>
+<p>使用 <code>super()</code> 时需要牢记以下几点：</p>
+<ol>
+<li>你只能在派生类中使用 <code>super()</code> 。若尝试在非派生类（即：没有使用 <code>extends</code> 关键字的类）或函数中使用它，就会抛出错误。</li>
+<li>在构造器中，你必须在访问 <code>this</code> 之前调用 <code>super()</code> 。 由于 <code>super()</code> 负责初始化 <code>this</code> ， 因此试图先访问 <code>this</code> 自然就会造成错误。</li>
+<li>唯一能避免调用 <code>super()</code> 的办法，是从类构造器中返回一个对象。</li>
+</ol>
+</blockquote>
+<h3 id="屏蔽类方法"><a href="#屏蔽类方法" class="headerlink" title="屏蔽类方法"></a>屏蔽类方法</h3><p>派生类中的方法总是会屏蔽基类的同名方法。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sayName() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sayName() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"ES6"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> child = <span class="keyword">new</span> Child(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">child.sayName() <span class="comment">// ES6</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="继承静态成员"><a href="#继承静态成员" class="headerlink" title="继承静态成员"></a>继承静态成员</h3><p>如果基类包含静态成员，那么这些静态成员在派生类中也是可用的。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> sayName() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"zzzhim"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Child.sayName() <span class="comment">// zzzhim</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="从表达式中派生类"><a href="#从表达式中派生类" class="headerlink" title="从表达式中派生类"></a>从表达式中派生类</h3><p>在 ES6 中派生类的最强大能力，或许就是能够从表达式中派生类。只要一个表达式能够返回一个具有 <code>[[Construct]]</code> 属性以及原型的函数，你就可以对其使用 <code>extends</code>。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Father</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.name = name</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Father.prototype.sayName = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> child = <span class="keyword">new</span> Child(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">child.sayName() <span class="comment">// zzzhim</span></span><br></pre></td></tr></table></figure>
+
+<p>在上例中 <code>Father</code> 是一个 ES5 风格的构造器，而 <code>Child</code> 是一个类。但是因为 <code>Father</code> 具有 <code>[[Construct]]</code> 以及原型，所以 <code>Child</code> 可以直接继承它。</p>
+<p><code>extends</code> 后面能够接受任意类型的表达式。例如动态地决定所要继承的类。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Father</span>(<span class="params">name</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.name = name</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Father.prototype.sayName = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getClass</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Father</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span> <span class="keyword">extends</span> <span class="title">getClass</span>() </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> child = <span class="keyword">new</span> Child(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line">child.sayName() <span class="comment">// zzzhim</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>任意表达式都能在 <code>extends</code> 关键字后使用，但并非所有表达式的结果都是一个有效的类。特别的，下列表达式类型会导致错误：</p>
+<ul>
+<li>null</li>
+<li>生成器函数<br>试图使用结果为上述值的表达式来创建一个新的类实例，都会抛出错误，因为不存在 <code>[[Construct]]</code> 可供调用。</li>
+</ul>
+</blockquote>
+<h3 id="继承内置对象"><a href="#继承内置对象" class="headerlink" title="继承内置对象"></a>继承内置对象</h3><p>在 <strong>ES6</strong> 基于类的继承中， <code>this</code> 的值先被基类创建，随后才被派生类的构造器所修改。结果是 <code>this</code> 初始就拥有作为基类的内置对象的所有功能，并能正确接收与之关联的所有功能。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyArray</span> <span class="keyword">extends</span> <span class="title">Array</span> </span>&#123;</span><br><span class="line">    <span class="comment">// no thing</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> colors = <span class="keyword">new</span> MyArray()</span><br><span class="line"></span><br><span class="line">colors[<span class="number">0</span>] = <span class="string">"red"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(colors.length) <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line">colors.push(<span class="string">"green"</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(colors.length) <span class="comment">// 2</span></span><br><span class="line"></span><br><span class="line">colors.length = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(colors[<span class="number">0</span>]) <span class="comment">// undefined</span></span><br><span class="line"><span class="built_in">console</span>.log(colors[<span class="number">1</span>]) <span class="comment">// undefined</span></span><br></pre></td></tr></table></figure>
+
+<p>从上面代码可以看出，<code>MyArray</code> 直接继承了 <code>Array</code> ，因此工作方式与正规数组相同。</p>
+<h3 id="Symbol-species-属性"><a href="#Symbol-species-属性" class="headerlink" title="Symbol.species 属性"></a>Symbol.species 属性</h3><p>继承内置对象一个有趣的方面是：任意能返回内置对象实例的方法，在派生类上却会自动返回派生类的实例。因此，若你拥有一个继承了 <code>Array</code> 的派生类 <code>MyArray</code> ，诸如 <code>slice()</code> 之类的方法都会返回 <code>MyArray</code> 的实例。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyArray</span> <span class="keyword">extends</span> <span class="title">Array</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 空代码块</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> items = <span class="keyword">new</span> MyArray(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> subitems = items.slice(<span class="number">1</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(items <span class="keyword">instanceof</span> MyArray)    <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(subitems <span class="keyword">instanceof</span> MyArray) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>在此代码中， <code>slice()</code> 方法返回了 <code>MyArray</code> 的一个实例。 <code>slice()</code> 方法是从 <code>Array</code> 上继承的，原本应当返回 <code>Array</code> 的一个实例。</p>
+<p>造成这种变化的原因是因为 <code>Array</code> 类型拥有默认的 <code>Symbol.species</code> 属性，它们的返回值为 <code>this</code>，意味着该属性总是会返回自身的构造器函数。</p>
+<blockquote>
+<p>下列内置类型都定义了 Symbol.species ：</p>
+<ul>
+<li><code>Array</code></li>
+<li><code>ArrayBuffer</code></li>
+<li><code>Map</code></li>
+<li><code>Promise</code></li>
+<li><code>Array</code></li>
+<li><code>Set</code></li>
+<li><code>类型化数组</code></li>
+</ul>
+</blockquote>
+<p>当然了，假如我们想要在 <code>MyArray</code> 上返回 <code>Array</code> 对象。我们可以这样做：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyArray</span> <span class="keyword">extends</span> <span class="title">Array</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">get</span> [Symbol.species]() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Array</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> items = <span class="keyword">new</span> MyArray(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> subitems = items.slice(<span class="number">1</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(items <span class="keyword">instanceof</span> MyArray)    <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(subitems <span class="keyword">instanceof</span> MyArray) <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>Symbol.species</code> 知名符号被用于定义 <code>MyArray</code> 的一个静态访问器属性。注意此处只有 <code>getter</code> 而没有 <code>setter</code> ，这是因为修改类的 <code>species</code> 是不允许的。</p>
+</blockquote>
+<h3 id="在类构造器中使用-new-target"><a href="#在类构造器中使用-new-target" class="headerlink" title="在类构造器中使用 new.target"></a>在类构造器中使用 new.target</h3><p>我们可以在类构造器中使用 <code>new.target</code> ，来判断类是被如何调用的。</p>
+<p>在一般情况下， <code>new.target</code> 就等于本类的构造器函数。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Cat</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(color) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">new</span>.target === Cat)</span><br><span class="line">        <span class="built_in">console</span>.log(color + <span class="string">" cat"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> cat = <span class="keyword">new</span> Cat(<span class="string">"white"</span>)</span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="comment">// true</span></span><br><span class="line"><span class="comment">// white cat</span></span><br></pre></td></tr></table></figure>
+
+<p>上面代码说明当 <code>new Cat(&quot;white&quot;)</code> 被调用时， <code>new.target</code> 等于 <code>Cat</code>。因为类构造器被调用时不能缺少 <code>new</code> ， 所以 <code>new.target</code> 属性就始终会在类构造器内被定义。不过在有些情况下，这个值并不总是相同的。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Cat</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(color) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="keyword">new</span>.target === Cat)</span><br><span class="line">        <span class="built_in">console</span>.log(color + <span class="string">" cat"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WhiteCat</span> <span class="keyword">extends</span> <span class="title">Cat</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(color) &#123;</span><br><span class="line">        <span class="keyword">super</span>(color)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> whiteCat = <span class="keyword">new</span> WhiteCat(<span class="string">"white"</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="comment">// false</span></span><br><span class="line"><span class="comment">// white cat</span></span><br></pre></td></tr></table></figure>
+
+<p><code>WhiteCat</code> 调用了 <code>Cat</code> 的构造器，因此 <code>Cat</code> 构造器被调用时， <code>new.target</code> 实际上是等于 <code>WhiteCat</code> 的。这是很重要的，因为构造器会根据是否被调用而有不同的行为，可能会因此造成一些不必要的问题。当然我们也可以创建一种只能被继承无法被实例化的抽象基类。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 无法被实例化的抽象基类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Cat</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(color) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">new</span>.target === Cat) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">"This class cannot be instantiated directly"</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">console</span>.log(color + <span class="string">" cat"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WhiteCat</span> <span class="keyword">extends</span> <span class="title">Cat</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(color) &#123;</span><br><span class="line">        <span class="keyword">super</span>(color)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> cat = <span class="keyword">new</span> Cat(<span class="string">"white"</span>) <span class="comment">// 抛出错误</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> whiteCat = <span class="keyword">new</span> WhiteCat(<span class="string">"white"</span>) <span class="comment">// 没有错误，输出 white cat</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(whiteCat <span class="keyword">instanceof</span> WhiteCat); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>由于调用类时不能缺少 <code>new</code> ，于是 <code>new.target</code> 属性在类构造器内部就绝不会是 <code>undefined</code> 。</p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/js/class/" data-id="ck4bd0sqk0005mou1h6gqgm42"
+        class="article-share-link">分享</a>
+      
+
+    </footer>
+
+  </div>
+
+  
+  
+  <nav class="article-nav">
+    
+      <a href="/2019/12/16/js/block/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            块级绑定
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2019/12/16/js/deconstruction/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">解构赋值</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+  
+<!-- valine评论 -->
+<div id="vcomments-box">
+    <div id="vcomments">
+    </div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine@1.3.10/dist/Valine.min.js'></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        notify: false,
+        verify: false,
+        app_id: 'pUhbbBIdkBPvVbR0iVMNbxKB-gzGzoHsz',
+        app_key: '5hUYxDcuUwUe18KzRrGfF2mn',
+        path: window.location.pathname,
+        avatar: 'mp',
+        placeholder: '给我的文章加点评论吧~',
+        recordIP: true
+    });
+    const infoEle = document.querySelector('#vcomments .info');
+    if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+        infoEle.childNodes.forEach(function (item) {
+            item.parentNode.removeChild(item);
+        });
+    }
+</script>
+<style>
+    #vcomments-box {
+        padding: 5px 30px;
+    }
+
+    @media screen and (max-width: 800px) {
+        #vcomments-box {
+            padding: 5px 0px;
+        }
+    }
+
+    #vcomments-box #vcomments {
+        background-color: #fff;
+    }
+
+    .v .vlist .vcard .vh {
+        padding-right: 20px;
+    }
+
+    .v .vlist .vcard {
+        padding-left: 10px;
+    }
+</style>
+
+  
+
+  
+  
+  
+
+</article>
+</section>
+      <footer>
+  
+</footer>
+
+
+<!-- <footer class="footer">
+  <div class="outer">
+    <ul class="list-inline">
+      <li>
+        &copy;
+        2019
+        
+      </li>
+      <li>
+        
+      </li>
+    </ul>
+    <ul class="list-inline">
+      <li>
+        
+        
+        <ul class="list-inline">
+  <li>PV:<span id="busuanzi_value_page_pv"></span></li>
+  <li>UV:<span id="busuanzi_value_site_uv"></span></li>
+</ul>
+        
+      </li>
+      <li> -->
+        <!-- cnzz统计 -->
+        <!-- 
+      </li>
+    </ul>
+  </div>
+</footer> -->
+    <div class="to_top">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+      </div>
+    </main>
+    
+    <aside class="sidebar">
+      
+        <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <!-- <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt=""></a>
+  </div> -->
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">目录</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+      </aside>
+      
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+
+<script src="/js/ayer.js"></script>
+
+
+
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  </div>
+</body>
+
+</html>

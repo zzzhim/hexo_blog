@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    块级绑定 |  
+  </title>
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+  
+<script src="/js/pace.min.js"></script>
+
+
+  
+
+  
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    <main class="content">
+      <section class="outer">
+  <article id="es6-js/block" class="article article-type-es6" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  块级绑定
+</h1>
+  
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2019/12/16/js/block/" class="article-date">
+  <time datetime="2019-12-16T12:48:06.000Z" itemprop="datePublished">2019-12-16</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+      <h1 id="块级绑定"><a href="#块级绑定" class="headerlink" title="块级绑定"></a>块级绑定</h1><h3 id="var-声明与变量提升"><a href="#var-声明与变量提升" class="headerlink" title="var 声明与变量提升"></a>var 声明与变量提升</h3><p>使用 <code>var</code> 关键字声明的变量，无论其实际声明位置在何处，都会被视为声明于所在函数的顶部（如果声明不在任意函数内，则视为在全局作用域的顶部）。这就是所谓的变量提升。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getValue</span>(<span class="params">condition</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(condition) &#123;</span><br><span class="line">        <span class="keyword">var</span> value = <span class="string">"blue"</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> value</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(value) <span class="comment">// 在此处可以访问，值为undefined</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(value) <span class="comment">// 在此处可以访问，值为undefined</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于刚接触 <code>JS</code> 的人，或许会认为仅当 <code>condition</code> 的值为 <strong>true</strong> 时，变量 <code>value</code> 才会被创建。但实际上 <code>value</code> 无论何时都会被创建。 <code>JS</code> 引擎在后台对 <code>getValue</code> 函数进行了调整，就像下面这样：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getValue</span>(<span class="params">condition</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> value <span class="comment">// 未初始化的变量，默认值为undefined</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(condition) &#123;</span><br><span class="line">        value = <span class="string">"blue"</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> value</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(value) <span class="comment">// 在此处可以访问，值为undefined</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(value) <span class="comment">// 在此处可以访问，值为undefined</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>value</code> 变量的声明被提升到了顶部，而初始化工作则保留在原处。这也代表我们可以在 <code>else</code> 分支内 <code>value</code> 变量也可以被我们访问到，此处它的值会是 <code>undefined</code> ，因为它并没有被初始化。</p>
+<p>?&gt; <strong>块级声明：</strong> 块级声明也就是让所声明的变量在指定块的作用域外无法被访问。块级作用域（又被称为词法作用域）在以下情况被创建：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 在一个函数内部</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fun</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// no thing</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 在一个代码块（由一对花括号包裹）内部</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// no thing</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="let-声明"><a href="#let-声明" class="headerlink" title="let 声明"></a>let 声明</h3><p><code>let</code> 声明的语法与 <code>var</code> 的语法一致。我们完全可以用 <code>let</code> 来代替 <code>var</code> 进行变量声明，但会将变量的作用域限制在当前的块级作用域中。由于 <code>let</code> 声明不存在变量提升，因此我们需要手动将 <code>let</code> 声明放置到顶部，以便让变量在整个代码块都可以被访问到。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getValue</span>(<span class="params">condition</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(condition) &#123;</span><br><span class="line">        <span class="keyword">let</span> value = <span class="string">"blue"</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> value</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// value 在此处不可被访问</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// value 在此处不可被访问</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>?&gt; 这种写法的 <code>getValue</code> 函数的行为更接近其他类<strong>C</strong>语言。由于变量 <code>value</code> 声明使用的是 <code>let</code> 而非 <code>var</code>,该声明就没有被提升到函数定义的顶部，因此变量 <code>value</code> 在 <code>if</code> 代码块外部是无法访问的；并且在 <code>condition</code> 的值为 <strong>false</strong> 时，该变量是永远不会被声明并初始化的。</p>
+<h3 id="禁止重复声明"><a href="#禁止重复声明" class="headerlink" title="禁止重复声明"></a>禁止重复声明</h3><p>如果一个标识符已经在代码块内部被定义，那么在此代码块内使用同一个标识符进行 <code>let</code> 声明就会导致<strong>抛出错误</strong>。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> count = <span class="number">30</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 语法错误 Identifier 'count' has already been declared</span></span><br><span class="line"><span class="keyword">let</span> count = <span class="number">40</span></span><br></pre></td></tr></table></figure>
+<p>在本例中，<code>count</code> 变量被声明了两次：一次使用 <code>var</code> ，另一次使用 <code>let</code>。 因为 <code>let</code> 不能在同一作用域内重复声明一个已有标识符，此处的 <code>let</code> 声明就会抛出错误。另一方面，在嵌套的作用域内使用 <code>let</code> 声明一个同名的新变量，则不会抛出错误。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> count = <span class="number">30</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 不会抛出错误</span></span><br><span class="line"><span class="keyword">if</span>(condition) &#123;</span><br><span class="line">    <span class="keyword">let</span> count = <span class="number">40</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在此处 <code>let</code> 声明并没有抛出错误，这是因为我们并不是在同一 <strong>块级作用域</strong> 再次创建此变量，而是在 <code>if</code> 代码块内部创建的，这个新变量会屏蔽全局的 <code>count</code> 变量，从而在局部阻止对于后者的访问。</p>
+<h3 id="常量声明"><a href="#常量声明" class="headerlink" title="常量声明"></a>常量声明</h3><p>在 <strong>ES6</strong> 中里也可以使用 <code>const</code> 语法进行声明。使用 <code>const</code> 声明的变量会被认为是 <strong>常量（constant）</strong> ，意味着它们的值在被设置完成后就不能再被改变。正因为如此，所有的 <code>const</code> 变量都需要在声明时进行初始化。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 有效的常量</span></span><br><span class="line"><span class="keyword">const</span> maxItems = <span class="number">30</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 语法错误：未进行初始化</span></span><br><span class="line"><span class="keyword">const</span> name</span><br></pre></td></tr></table></figure>
+
+<p><code>maxItems</code> 变量被初始化了，因此它的 <code>const</code> 声明能正常奇效。而 <code>name</code> 变量没有被初始化，导致在试图运行这段代码时抛出了错误。</p>
+<p>对比 <code>const</code> 声明与 <code>let</code> 声明</p>
+<p>常量声明与 <code>let</code> 声明一样，都是块级声明。这意味着常量在声明它们的语句块外部也是无法访问的，并且声明同样不会被提升。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (condition) &#123;</span><br><span class="line">    <span class="keyword">const</span> maxItems = <span class="number">5</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// maxItems 在此处无法被访问</span></span><br></pre></td></tr></table></figure>
+
+<p>与 <code>let</code> 的另一个相似之处，是 <code>const</code> 声明在同一个作用域内定义一个已经声明的变量时同样会抛出错误。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> message = <span class="string">"Hello!"</span></span><br><span class="line"><span class="keyword">let</span> age = <span class="number">25</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 二者都会抛出错误</span></span><br><span class="line"><span class="keyword">const</span> message = <span class="string">"Good!"</span></span><br><span class="line"><span class="keyword">const</span> age = <span class="number">18</span></span><br></pre></td></tr></table></figure>
+
+<p>两个 <code>const</code> 声明都可以单独使用，但是在前面使用 <code>var</code> 与 <code>let</code> 声明过后的情况下，二者都会抛出错误。</p>
+<p>!&gt; <code>let</code> 与 <code>const</code> 之间有个必须牢记的重大区别：试图对之前用 <code>const</code> 声明的常量进行赋值会抛出错误，无论是在严格模式还是非严格模式下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> maxItems = <span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误</span></span><br><span class="line">maxItems = <span class="number">6</span></span><br></pre></td></tr></table></figure>
+
+<p>?&gt; 这里需要注意的是 <code>maxItems</code> 变量不能被再次赋值。然而与其他语言不同， <strong>JS</strong> 的常量如果是一个对象，它所包含的值是可以被修改的。这是因为 <code>const</code> 声明创建一个值的只读引用。但这并不意味着它所持有的值是不可变的，只是变量标识符不能重新分配。例如，在引用内容是对象的情况下，这意味着可以改变对象的内容（例如，其参数）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> person = &#123;</span><br><span class="line">    name: <span class="string">'大白兔奶糖'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 正常</span></span><br><span class="line">person.name = <span class="string">'奶糖'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误</span></span><br><span class="line">person = &#123;</span><br><span class="line">    name: <span class="string">'软糖'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是因为 <code>person</code> 在初始化时被绑定了带有一个属性的对象。修改 <code>person.name</code> 是可以的，因为该操作只是修改了 <code>person</code> 对象的成员，并没有修改 <code>person</code> 的绑定值。但是当我们尝试为 <code>person</code> 对象重新赋值时（改变变量绑定），就会导致抛出错误。</p>
+<p>!&gt; <code>const</code> 阻止的是对于变量绑定的修改，而不阻止我们对成员值的修改。</p>
+<h3 id="暂时性死区"><a href="#暂时性死区" class="headerlink" title="暂时性死区"></a>暂时性死区</h3><p>使用 <code>let</code> 或 <code>const</code> 声明的变量，在达到声明处之前都是无法访问的，试图访问会导致一个引用错误，即使在我们进行安全的操作时（例如使用 <code>typeof</code> 运算符），也是如此。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(condition) &#123;</span><br><span class="line">    <span class="comment">//  Cannot access 'value' before initialization</span></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">typeof</span> value)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 虽然这里是使用的 let 声明的但是 const 也会出现相同的情况</span></span><br><span class="line">    <span class="keyword">let</span> value = <span class="string">"blue"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当我们使用 <code>let</code> 或 <code>const</code> 声明的变量，若试图在定义位置之前使用它，无论如何都不能避免暂时性死区。</p>
+<h3 id="循环中的块级绑定"><a href="#循环中的块级绑定" class="headerlink" title="循环中的块级绑定"></a>循环中的块级绑定</h3><p>我们最需要使用变量的块级作用域的场景，或许就是在 <code>for</code> 循环内，也就是想让一次性的循环计数器仅仅能在循环内部使用。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    process(arr[i])</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// i 在此处也是可以被访问到的</span></span><br><span class="line"><span class="built_in">console</span>.log(i) <span class="comment">// 10</span></span><br></pre></td></tr></table></figure>
+
+<p>如果我们把上面的示例换成 <code>let</code>，则会这样：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    process(arr[i])</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// i 在此处不可访问，抛出错误</span></span><br><span class="line"><span class="built_in">console</span>.log(i)</span><br></pre></td></tr></table></figure>
+
+<h3 id="循环内的函数"><a href="#循环内的函数" class="headerlink" title="循环内的函数"></a>循环内的函数</h3><p>长期以来， <code>var</code> 的特点使得循环变量在循环作用域之外仍然可被访问，于是在循环内创建函数就变得很有问题。如下:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> funcs = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    funcs.push(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(i)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">funcs.forEach(<span class="function"><span class="keyword">function</span> (<span class="params">fun</span>) </span>&#123;</span><br><span class="line">    fun() <span class="comment">// 输出数值 10 十次</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>?&gt; 可能我们本来预期这段代码会输出 0 到 9 的数值，但它却在同一行讲数值 10 输出了十次。这是因为变量 <code>i</code> 在循环的每次迭代中都被共享了，意味着循环内创建的那些函数都拥有对于同一变量的引用。在循环结束后，变量 <code>i</code> 的值会是 <code>10</code> ，因此当 <code>console.log(i)</code> 被调用时，每次都打印出 <code>10</code>。</p>
+<p>想要解决上面的问题，我们可以在循环内使用立即调用函数表达式（IIFE），以便在每次迭代中强制创建变量的一个新副本。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> funcs = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    funcs.push((<span class="function"><span class="keyword">function</span> (<span class="params">value</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(value)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;(i)))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">funcs.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">fun</span>) </span>&#123;</span><br><span class="line">    fun() <span class="comment">// 0 到 9 依次输出</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>虽然使用这种方法可以达到我们预期的效果，但是却增加了我们的代码量，幸运的是，使用 <code>let</code> 和 <code>const</code> 的块级绑定可以在 <strong>ES6</strong> 中简化这个循环。</p>
+<h3 id="循环内的-let-声明"><a href="#循环内的-let-声明" class="headerlink" title="循环内的 let 声明"></a>循环内的 let 声明</h3><p><code>let</code> 声明通过有效模仿上例中 <strong>IIFE</strong> 的作用而简化了循环。在每次迭代中，都会创建一个新的同名变量并对其进行初始化。这意味着我们完全可以省略 <strong>IIFE</strong> 而获得预期的结果。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> funcs = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    funcs.push(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(i)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">funcs.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">fun</span>) </span>&#123;</span><br><span class="line">    fun() <span class="comment">// 0 到 9 依次输出</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>?&gt; 与使用 <code>var</code> 声明以及 <code>IIFE</code> 相比，这样能达到相同的效果，而且更加简洁。在循环中 <code>let</code> 声明每次都创建了一个新的 <code>i</code> 变量，因此在循环内部创建的函数获得了各自的 <code>i</code> 副本，而每个 <code>i</code> 副本的值都在每次循环迭代声明变量的时候被确定了。这种方式同样可以应用在 <code>for-in</code> 和 <code>for-of</code> 循环中。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> funcs = []</span><br><span class="line"><span class="keyword">var</span> object = &#123;</span><br><span class="line">    a: <span class="literal">true</span>,</span><br><span class="line">    b: <span class="literal">true</span>,</span><br><span class="line">    c: <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">let</span> key <span class="keyword">in</span> object) &#123;</span><br><span class="line">    funcs.push(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(key)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">funcs.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">func</span>) </span>&#123;</span><br><span class="line">    func() <span class="comment">// 依次输出 "a"、 "b"、 "c"</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="循环内的常量声明"><a href="#循环内的常量声明" class="headerlink" title="循环内的常量声明"></a>循环内的常量声明</h3><p>ES6 规范没有明确禁止在循环中使用 <code>const</code> 声明，然而它会根据循环方式的不同而有不同行为。在常规的 <code>for</code> 循环中，我们可以在初始化时使用 <code>const</code> ，但循环会在你试图改变该变量的值时抛出错误。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> funcs = [];</span><br><span class="line"><span class="comment">// 在一次迭代后抛出错误</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i) <span class="comment">// 会在打印 0 之后抛出错误。</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>?&gt; 因为第一次迭代成功执行后，此时 <code>i</code> 的值为 0 。在 <code>i++</code> 执行时，一个错误抛出，这是因为该语句试图修改常量的值。</p>
+<p>但是当 <code>const</code> 变量在 <code>for-in</code> 或者 <code>for-of</code> 循环中使用时，与 <code>let</code> 变量效果相同。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> funcs = []</span><br><span class="line"><span class="keyword">var</span> object = &#123;</span><br><span class="line">    a: <span class="literal">true</span>,</span><br><span class="line">    b: <span class="literal">true</span>,</span><br><span class="line">    c: <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">const</span> key <span class="keyword">in</span> object) &#123;</span><br><span class="line">    funcs.push(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(key)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">funcs.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">func</span>) </span>&#123;</span><br><span class="line">    func() <span class="comment">// 依次输出 "a"、 "b"、 "c"</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>?&gt; <code>const</code> 能够在 <code>for-in</code> 或者 <code>for-of</code> 内工作，是因为循环为每次迭代创建了一个新的变量绑定，而不是去修改已绑定的变量的值。</p>
+<h3 id="全局块级绑定"><a href="#全局块级绑定" class="headerlink" title="全局块级绑定"></a>全局块级绑定</h3><p><code>let</code> 与 <code>const</code> 不同于 <code>var</code> 的另一个方面是在全局作用域上的表现。当在全局作用域上使用 <code>var</code> 时，它会创建一个新的全局变量，并且成为全局对象（浏览器上是 <code>window</code>）的一个属性。这意味着我们使用 <code>var</code> 可能会无意间覆盖某个已有的全局属性。但是当我们在全局作用域上使用 <code>let</code> 或 <code>const</code>时，虽然也会在全局作用域上创建新的绑定，但是并不会有任何属性添加到全局对象（<code>window</code>）上。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="built_in">RegExp</span> = <span class="string">"hello!"</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">window</span>.RegExp) <span class="comment">// "hello!"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> good = <span class="string">"Good!"</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">window</span>.good) <span class="comment">// "Good!"</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="built_in">RegExp</span> = <span class="string">"hello!"</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">RegExp</span>) <span class="comment">// "hello!"</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">window</span>.RegExp === <span class="built_in">RegExp</span>) <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> good = <span class="string">"Good!"</span></span><br><span class="line"><span class="built_in">console</span>.log(good) <span class="comment">// "Good!"</span></span><br><span class="line"><span class="built_in">console</span>.log(good <span class="keyword">in</span> <span class="built_in">window</span>) <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>let</code> 与 <code>const</code> 的块级绑定将<strong>块级作用域</strong>引入了<strong>JS</strong>。这两种方式都不会进行变量提升，并且只能在声明它们的<strong>块级作用域</strong>内部存在，并且在声明变量之前的位置访问时，会导致<strong>暂时性死区</strong>的错误。</p>
+<p><code>let</code> 与 <code>const</code> 的表现在很多情况下都类似与 <code>var</code>，然而在循环中有明显的区别。在 <code>for-in</code> 和 <code>for-of</code> 循环中，<code>let</code> 与 <code>const</code> 都能在迭代的时候创建一个新的绑定，这意味这在循环体内创建的函数可以使用当前迭代所绑定的循环变量值（而不是像使用 <code>var</code> 那样，统一使用循环结束时的变量值）。这一点在 <code>for</code> 循环中使用 <code>let</code> 声明时也成立，不过在 <code>for</code> 循环中使用 <code>const</code> 声明会导致错误。</p>
+<p>在使用<strong>块级绑定</strong>的时候默认情况下应该使用 <code>const</code> ，只有在明确知道变量值需要更改的情况下才使用 <code>let</code> 。这样有助于防止某些类型的错误。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/js/block/" data-id="ck4bd0sqi0004mou1eyuw8fm0"
+        class="article-share-link">分享</a>
+      
+
+    </footer>
+
+  </div>
+
+  
+  
+  <nav class="article-nav">
+    
+      <a href="/2019/12/16/js/SetAndMap/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Set与Map
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2019/12/16/js/class/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">JS的类</div>
+      </a>
+    
+  </nav>
+
+
+  
+
+  
+  
+<!-- valine评论 -->
+<div id="vcomments-box">
+    <div id="vcomments">
+    </div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine@1.3.10/dist/Valine.min.js'></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        notify: false,
+        verify: false,
+        app_id: 'pUhbbBIdkBPvVbR0iVMNbxKB-gzGzoHsz',
+        app_key: '5hUYxDcuUwUe18KzRrGfF2mn',
+        path: window.location.pathname,
+        avatar: 'mp',
+        placeholder: '给我的文章加点评论吧~',
+        recordIP: true
+    });
+    const infoEle = document.querySelector('#vcomments .info');
+    if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+        infoEle.childNodes.forEach(function (item) {
+            item.parentNode.removeChild(item);
+        });
+    }
+</script>
+<style>
+    #vcomments-box {
+        padding: 5px 30px;
+    }
+
+    @media screen and (max-width: 800px) {
+        #vcomments-box {
+            padding: 5px 0px;
+        }
+    }
+
+    #vcomments-box #vcomments {
+        background-color: #fff;
+    }
+
+    .v .vlist .vcard .vh {
+        padding-right: 20px;
+    }
+
+    .v .vlist .vcard {
+        padding-left: 10px;
+    }
+</style>
+
+  
+
+  
+  
+  
+
+</article>
+</section>
+      <footer>
+  
+</footer>
+
+
+<!-- <footer class="footer">
+  <div class="outer">
+    <ul class="list-inline">
+      <li>
+        &copy;
+        2019
+        
+      </li>
+      <li>
+        
+      </li>
+    </ul>
+    <ul class="list-inline">
+      <li>
+        
+        
+        <ul class="list-inline">
+  <li>PV:<span id="busuanzi_value_page_pv"></span></li>
+  <li>UV:<span id="busuanzi_value_site_uv"></span></li>
+</ul>
+        
+      </li>
+      <li> -->
+        <!-- cnzz统计 -->
+        <!-- 
+      </li>
+    </ul>
+  </div>
+</footer> -->
+    <div class="to_top">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+      </div>
+    </main>
+    
+    <aside class="sidebar">
+      
+        <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <!-- <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt=""></a>
+  </div> -->
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">目录</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+      </aside>
+      
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+
+<script src="/js/ayer.js"></script>
+
+
+
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  </div>
+</body>
+
+</html>

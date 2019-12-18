@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+    符号（Symbol）与符号（Symbol）属性 |  
+  </title>
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+  
+<script src="/js/pace.min.js"></script>
+
+
+  
+
+  
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    <main class="content">
+      <section class="outer">
+  <article id="es6-js/symbol" class="article article-type-es6" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  符号（Symbol）与符号（Symbol）属性
+</h1>
+  
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2019/12/16/js/symbol/" class="article-date">
+  <time datetime="2019-12-16T12:48:06.000Z" itemprop="datePublished">2019-12-16</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+    <div class="tocbot"></div>
+
+
+
+
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+      <h1 id="符号（Symbol）与符号（Symbol）属性"><a href="#符号（Symbol）与符号（Symbol）属性" class="headerlink" title="符号（Symbol）与符号（Symbol）属性"></a>符号（Symbol）与符号（Symbol）属性</h1><p>在 JS 已有的基本类型之外，ES6 引入了一种新的基本数据类型： <strong>符号（<code>Symbol</code>）</strong> 。</p>
+<p><code>Symbol()</code> 函数会返回 <strong>Symbol</strong> 类型的值，该类型具有静态属性和静态方法。它的静态属性会暴露几个内建的成员对象；它的静态方法会暴露全局的 <strong>symbol</strong> 注册，且类似于内建对象类，但作为构造函数来说它并不完整，因为它不支持语法：<code>new Symbol()</code>。</p>
+<p>?&gt; 每个 <code>Symbol()</code> 返回的 <strong>symbol</strong> 值都是唯一的。一个 <strong>symbol</strong> 值能作为对象属性的标识符；这也是 <strong>symbol</strong>存在的意义。</p>
+<h3 id="创建符号值"><a href="#创建符号值" class="headerlink" title="创建符号值"></a>创建符号值</h3><p>符号没有字面量形式，这在 <strong>JS</strong> 的基本类型中是独一无二的。想要创建一个 <strong>symbol</strong> 值，我们可以使用全局函数 <strong>Symbol()</strong> 来创建。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> firstName = <span class="built_in">Symbol</span>()</span><br><span class="line"><span class="keyword">const</span> person = &#123;&#125;</span><br><span class="line"></span><br><span class="line">person[firstName] = <span class="string">'反芹菜联盟盟主'</span></span><br><span class="line"><span class="built_in">console</span>.log(person[firstName]) <span class="comment">// 反芹菜联盟盟主</span></span><br></pre></td></tr></table></figure>
+
+<p>通过上面的方法我们创建了一个名叫 <code>firstName</code> 的符号类型的变量，并将它作为了 <code>person</code> 对象的一个属性，而每次访问该属性都要使用这个符号值。</p>
+<h6 id="符号描述"><a href="#符号描述" class="headerlink" title="符号描述"></a>符号描述</h6><p><code>Symbol()</code> 函数还可以接受一个额外的参数用于描述符号值，但是该描述不能用来访问对应属性，但是可以用于调试。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> name = <span class="built_in">Symbol</span>(<span class="string">'name'</span>)</span><br><span class="line"><span class="keyword">const</span> person = &#123;&#125;</span><br><span class="line"></span><br><span class="line">person[name] = <span class="string">'反芹菜联盟盟主'</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person[name]) <span class="comment">// 反芹菜联盟盟主</span></span><br><span class="line"><span class="built_in">console</span>.log(name) <span class="comment">// Symbol(name)</span></span><br></pre></td></tr></table></figure>
+
+<p>符号的描述信息会被储存在内部属性 <code>[[Description]]</code> 中，当我们显式或者隐式调用时，该属性都会被读取。</p>
+<p>当我们使用 <code>console.log()</code> 打印 <code>name</code> 符号时， <code>console.log()</code> 就隐式调用了 <code>name</code> 变量的 <code>toString()</code> 方法了。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> name = <span class="built_in">Symbol</span>(<span class="string">'name'</span>)</span><br><span class="line"><span class="keyword">const</span> str = name.toString()</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(str)  <span class="comment">// Symbol(name)</span></span><br><span class="line"><span class="built_in">console</span>.log(name) <span class="comment">// Symbol(name)</span></span><br></pre></td></tr></table></figure>
+
+<p>?&gt; 除了使用 <code>toString()</code> 方法，目前还没有其他办法可以从代码中直接访问 <code>[[Description]]</code> 属性。</p>
+<h3 id="识别符号值"><a href="#识别符号值" class="headerlink" title="识别符号值"></a>识别符号值</h3><p>由于符号是基本类型的值，因此我们可以使用 <code>typeof</code> 运算符来判断一个变量是否为符号。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> symbol = <span class="built_in">Symbol</span>(<span class="string">'test symbol'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> symbol === <span class="string">'symbol'</span>) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="使用符号值"><a href="#使用符号值" class="headerlink" title="使用符号值"></a>使用符号值</h3><p>我们可以再任意能够使用 <strong>需计算属性名</strong> 的场合使用符号。此外还可以在 <code>Object.defineProperty()</code> 或者 <code>Object.defineProperties()</code> 调用中使用它。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> name = <span class="built_in">Symbol</span>(<span class="string">'name'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用需计算属性名</span></span><br><span class="line"><span class="keyword">const</span> person = &#123;</span><br><span class="line">    [name]: <span class="string">'反芹菜联盟盟主1'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 让该属性变为只读</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(person, name, &#123;</span><br><span class="line">    writable: <span class="literal">false</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> restName = <span class="built_in">Symbol</span>(<span class="string">'name'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">Object</span>.defineProperties(person, &#123;</span><br><span class="line">    [restName]: &#123;</span><br><span class="line">        value: <span class="string">'反芹菜联盟盟主2'</span>,</span><br><span class="line">        writable: <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person[name])       <span class="comment">// 反芹菜联盟盟主1</span></span><br><span class="line"><span class="built_in">console</span>.log(person[restName])   <span class="comment">// 反芹菜联盟盟主2</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty" target="_blank" rel="noopener">Object.defineProperty()</a> 方法会直接在一个对象上定义一个新属性，或者修改一个对象的现有属性， 并返回这个对象。</p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperties" target="_blank" rel="noopener">Object.defineProperties()</a> 方法直接在一个对象上定义新的属性或修改现有属性，并返回该对象。</p>
+</blockquote>
+<h3 id="共享符号值"><a href="#共享符号值" class="headerlink" title="共享符号值"></a>共享符号值</h3><p>假如我们想要在不同的代码段中使用同一个 <strong>符号值</strong> ，例如在两个不同的对象类型中使用同一个 <strong>符号属性</strong> ，用来表示一个唯一标识符。为此，ES6 为我们提供了 <strong>“全局符号注册表”</strong> 供我们在任意时间点进行访问。</p>
+<p>想要创建 <strong>共享符号值</strong> ，应该使用 <code>Symbol.for()</code> 方法而不是 <code>Symbol()</code> 方法。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> id = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"><span class="keyword">const</span> obj = &#123;&#125;</span><br><span class="line"></span><br><span class="line">obj[id] = <span class="number">123</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(obj[id]) <span class="comment">// 123</span></span><br><span class="line"><span class="built_in">console</span>.log(id)      <span class="comment">// Symbol(id)</span></span><br></pre></td></tr></table></figure>
+
+<p>?&gt; <code>Symbol.for()</code> 方法仅接受单个字符串类型的参数，作为目标符号值的标识符，同时此参数也会成为该符号的描述信息。</p>
+<p><code>Symbol.for()</code> 方法创建前，会首先搜索 <strong>全局符号注册表</strong> ，看看是否存在一个键值为 <code>id</code> 的 <strong>符号值</strong> 。如果存在就会返回已存在的 <strong>符号值</strong> ；否则创建一个新的 <strong>符号值</strong> 。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> id1 = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    [id1]: <span class="number">123</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(obj[id1]) <span class="comment">// 123</span></span><br><span class="line"><span class="built_in">console</span>.log(id1)      <span class="comment">// Symbol(id)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> id2 = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(id1 === id2) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(obj[id2]) <span class="comment">// 123</span></span><br><span class="line"><span class="built_in">console</span>.log(id2)      <span class="comment">// Symbol(id)</span></span><br></pre></td></tr></table></figure>
+
+<p>在上面的例子中，<code>id1</code> 和 <code>id2</code> 包含同一个 <strong>符号值</strong> ，在第一次调用 <code>Symbol.for(&#39;id&#39;)</code> 时创建了这个 <strong>符号值</strong> ，而第二次调用在 <strong>全局符号注册表</strong> 检测到此 <strong>符号值</strong> 以创建，则返回了已存在的 <strong>符号值</strong> 。</p>
+<h3 id="Symbol-keyFor"><a href="#Symbol-keyFor" class="headerlink" title="Symbol.keyFor()"></a>Symbol.keyFor()</h3><p>从 <strong>全局symbol注册表</strong> 中，根据 <strong>符号值</strong> 检索出对应的键值。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> id = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Symbol</span>.keyFor(id)) <span class="comment">// id</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="符号值的转换"><a href="#符号值的转换" class="headerlink" title="符号值的转换"></a>符号值的转换</h3><p>类型转换是 <strong>JS</strong> 语言重要的一部分，能够非常灵活地将一种数据类型转换为另一种。然而符号类型在进行转换时非常不灵活，因为其他类型缺乏与符号值的合理等价，尤其是符号值无法被转换为字符串或数值。</p>
+<p>因为符号值无法被转换为字符串或数值，也就以为着当我们把 <strong>符号（<code>Symbol</code>）</strong> 与字符串进行连接或者对其使用数学运算符都会导致其发生错误。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> id = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误：Cannot convert a Symbol value to a string</span></span><br><span class="line"><span class="keyword">const</span> str = id + <span class="string">''</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> symbol = <span class="built_in">Symbol</span>.for(<span class="string">'number'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误：Cannot convert a Symbol value to a number</span></span><br><span class="line"><span class="keyword">const</span> num = symbol + <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>?&gt; 虽然说不能够对 <strong>符号</strong> 使用数学运算符，不过使用逻辑运算符是不会导致错误的，因为符号值在逻辑运算符中会被认为等价于 <code>true</code> （就像 <strong>JS</strong> 中其他的非空值一样）。</p>
+<h3 id="检索符号属性"><a href="#检索符号属性" class="headerlink" title="检索符号属性"></a>检索符号属性</h3><p>想要检索对象的所有属性名称可以使用 <code>Object.keys()</code> 与 <code>Object.getOwnPropertyNames()</code>。</p>
+<blockquote>
+<p><code>Object.keys()</code> 方法会返回一个由一个给定对象的自身可枚举属性组成的数组，数组中属性名的排列顺序和使用 <code>for...in</code> 循环遍历该对象时返回的顺序一致 。如果对象的键-值都不可枚举，那么将返回由键组成的数组。</p>
+<p><code>Object.getOwnPropertyNames()</code>方法返回一个由指定对象的所有自身属性的属性名（包括不可枚举属性但不包括Symbol值作为名称的属性）组成的数组。</p>
+</blockquote>
+<p>上面的两种方法都不能返回符号类型的属性，以保持它们在 <strong>ES5</strong>的功能不发生变化。为了让我们可以检索对象的符号类型属性，<strong>ES6</strong> 新增了 <code>Object.getOwnPropertySymbols()</code> 方法。</p>
+<blockquote>
+<p><code>Object.getOwnPropertySymbols()</code> 方法返回一个给定对象自身的所有 Symbol 属性的数组。</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> symbol = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    a: <span class="string">'aaa'</span>,</span><br><span class="line">    [symbol]: <span class="number">123</span>,</span><br><span class="line">    b: <span class="string">'bbb'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr = <span class="built_in">Object</span>.getOwnPropertySymbols(obj)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr.length)  <span class="comment">// 1</span></span><br><span class="line"><span class="built_in">console</span>.log(arr[<span class="number">0</span>])      <span class="comment">// Symbol(id)</span></span><br><span class="line"><span class="built_in">console</span>.log(obj[arr[<span class="number">0</span>]]) <span class="comment">// 123</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的代码中 <code>obj</code> 对象有2个普通属性和一个 <code>Symbol</code> 属性，我们使用 <code>Object.getOwnPropertySymbols()</code> 方法返回的数组，则只包含了它的符号值。</p>
+<p>所有对象初始化情况下都不包含任何自由符号类型属性，但对象可以从它们的原型上继承符合类型属性。<strong>ES6</strong> 预定义了一些此类属性，它们被称为“知名符合”。</p>
+<h3 id="使用知名符号暴露内部方法"><a href="#使用知名符号暴露内部方法" class="headerlink" title="使用知名符号暴露内部方法"></a>使用知名符号暴露内部方法</h3><p><strong>ES6</strong> 允许使用符号类型的原型属性来定义某些对象的基础行为。</p>
+<p><strong>ES6</strong> 定义了“知名符号”来代表 JS 中一些公共行为，而这些行为此前被认为只能是内部操作。<br>每一个知名符号都对应全局 <code>Symbol</code> 对象的一个属性，例如 <code>Symbol.create</code> 。</p>
+<p>这些知名符号下面会介绍一部分：</p>
+<p>迭代 <code>symbols</code></p>
+<blockquote>
+<p><code>Symbol.iterator</code>：一个返回一个对象默认迭代器的方法。被 <code>for...of</code> 使用。</p>
+<p><code>Symbol.asyncIterator</code>: 一个返回对象默认的异步迭代器的方法。被 for await of 使用。</p>
+</blockquote>
+<p>正则表达式 symbols</p>
+<blockquote>
+<p><code>Symbol.match</code>：一个用于对字符串进行匹配的方法，也用于确定一个对象是否可以作为正则表达式使用。被 <code>String.prototype.match()</code> 使用。</p>
+<p><code>Symbol.replace</code>：一个替换匹配字符串的子串的方法. 被 <code>String.prototype.replace()</code> 使用。</p>
+<p><code>Symbol.search</code>： 一个返回一个字符串中与正则表达式相匹配的索引的方法。被<code>String.prototype.search()</code> 使用。</p>
+<p><code>Symbol.split</code>： 一个在匹配正则表达式的索引处拆分一个字符串的方法.。被 <code>String.prototype.split()</code> 使用。</p>
+</blockquote>
+<p>其他 symbols</p>
+<blockquote>
+<p><code>Symbol.hasInstance</code>： 一个确定一个构造器对象识别的对象是否为它的实例的方法。被 <code>instanceof</code> 使用。</p>
+<p><code>Symbol.isConcatSpreadable</code>： 一个布尔值，表明一个对象是否应该 <code>flattened</code> 为它的数组元素。被 <code>Array.prototype.concat()</code> 使用。</p>
+<p><code>Symbol.unscopables</code>： 拥有和继承属性名的一个对象的值被排除在与环境绑定的相关对象外。</p>
+<p><code>Symbol.species</code>： 一个用于创建派生对象的构造器函数。</p>
+<p><code>Symbol.toPrimitive</code>： 一个将对象转化为基本数据类型的方法。</p>
+<p><code>Symbol.toStringTag</code>：用于对象的默认描述的字符串值。被 <code>Object.prototype.toString()</code> 使用。</p>
+</blockquote>
+<h6 id="Symbol-hasInstance"><a href="#Symbol-hasInstance" class="headerlink" title="Symbol.hasInstance"></a><code>Symbol.hasInstance</code></h6><p>每个函数都具有一个 <code>Symbol.hasInstance</code> 方法，用来判断指定对象是否为本函数的一个实例。这个方法定义在 <code>Function.prototype</code> 上，因此所有函数都继承了面对 <code>instanceof</code> 运算符时的默认行为。 <code>Symbol.hasInstance</code> 属性自身是不可写入、不可配置、不可枚举的，从而保证它不会被错误地重写。</p>
+<p><code>Symbol.hasInstance</code> 方法只接受单个参数，即需要检测的值。如果该值是本函数的一个实例，则返回 <code>true</code>。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">([] <span class="keyword">instanceof</span> <span class="built_in">Array</span>) <span class="comment">// true</span></span><br><span class="line"><span class="comment">// 上面的代码等价于：</span></span><br><span class="line"><span class="built_in">Array</span>[<span class="built_in">Symbol</span>.hasInstance]([]) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>ES6 从本质上将 <code>instanceof</code> 运算符重定义为上述方法调用的简写语法，这样使用 <code>instanceof</code> 便会触发一次方法调用，实际上允许你改变该运算符的工作。</p>
+<p>我们可以自定义一个函数，使得任意对象都不会被判断为该函数的一个实例。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Fun</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// no thing</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注释此段代码则结果为 true</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(Fun, <span class="built_in">Symbol</span>.hasInstance, &#123;</span><br><span class="line">    value(v) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> obj = <span class="keyword">new</span> Fun()</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(obj <span class="keyword">instanceof</span> Fun) <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>Object.defineProperty()</code> 方法会直接在一个对象上定义一个新属性，或者修改一个对象的现有属性， 并返回这个对象。</p>
+</blockquote>
+<h6 id="Symbol-isConcatSpreadable"><a href="#Symbol-isConcatSpreadable" class="headerlink" title="Symbol.isConcatSpreadable"></a><code>Symbol.isConcatSpreadable</code></h6><p>内置的 <code>Symbol.isConcatSpreadable</code> 符号用于配置某对象作为 <code>Array.prototype.concat()</code> 方法的参数时是否展开其数组元素。</p>
+<p>默认情况下 <code>Array.prototype.concat()</code> 会展开自身元素连接到结果中。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr1 = [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> ]</span><br><span class="line"><span class="keyword">const</span> arr2 = [ <span class="number">4</span>, <span class="number">5</span> ]</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr3 = arr1.concat(arr2)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr3) <span class="comment">// [ 1, 2, 3, 4, 5 ]</span></span><br></pre></td></tr></table></figure>
+
+<p>当我们设置了 <code>Symbol.isConcatSpreadable</code> 属性为 <code>false</code> 时，如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr1 = [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> ]</span><br><span class="line"><span class="keyword">const</span> arr2 = [ <span class="number">4</span>, <span class="number">5</span> ]</span><br><span class="line"></span><br><span class="line">arr2[<span class="built_in">Symbol</span>.isConcatSpreadable] = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr3 = arr1.concat(arr2)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr3) <span class="comment">// [ 1, 2, 3, [ 4, 5 ] ]</span></span><br></pre></td></tr></table></figure>
+
+<p>对于类数组 (array-like)对象，默认不展开。期望展开其元素用于连接，需要设置 <code>Symbol.isConcatSpreadable</code> 为 <code>true</code> ：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr1 = [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> ]</span><br><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.isConcatSpreadable]: <span class="literal">true</span>,</span><br><span class="line">    length: <span class="number">2</span>,</span><br><span class="line">    <span class="number">0</span>: <span class="number">4</span>,</span><br><span class="line">    <span class="number">1</span>: <span class="number">5</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr3 = arr1.concat(obj)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr3) <span class="comment">// [ 1, 2, 3, 4, 5 ]</span></span><br></pre></td></tr></table></figure>
+
+<p>设置 <code>Symbol.isConcatSpreadable</code> 为 <code>false</code>，如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr1 = [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> ]</span><br><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.isConcatSpreadable]: <span class="literal">false</span>,</span><br><span class="line">    length: <span class="number">2</span>,</span><br><span class="line">    <span class="number">0</span>: <span class="number">4</span>,</span><br><span class="line">    <span class="number">1</span>: <span class="number">5</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr3 = arr1.concat(obj)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr3) <span class="comment">// [ 1, 2, 3, &#123; 0: 4, 1: 5, length: 2, Symbol(Symbol.isConcatSpreadable): false &#125;]</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Symbol-toPrimitive"><a href="#Symbol-toPrimitive" class="headerlink" title="Symbol.toPrimitive"></a>Symbol.toPrimitive</h6><p><code>Symbol.toPrimitive</code> 是一个内置的 <code>Symbol</code> 值，它是作为对象的函数值属性存在的，当一个对象转换为对应的原始值时，会调用此函数。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.toPrimitive]: <span class="function"><span class="keyword">function</span>(<span class="params">hint</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (hint == <span class="string">'number'</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">42</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(obj / <span class="number">2</span>) <span class="comment">// 21</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Symbol-toStringTag"><a href="#Symbol-toStringTag" class="headerlink" title="Symbol.toStringTag"></a>Symbol.toStringTag</h6><p><code>Symbol.toStringTag</code> 是一个内置 <code>symbol</code>，它通常作为对象的属性键使用，对应的属性值应该为字符串类型，这个字符串用来表示该对象的自定义类型标签，通常只有内置的 <code>Object.prototype.toString()</code> 方法会去读取这个标签并把它包含在自己的返回值里。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Cat</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// no thing</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Cat.prototype[<span class="built_in">Symbol</span>.toStringTag] = <span class="string">"Cat"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> cat = <span class="keyword">new</span> Cat()</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(cat.toString())</span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.prototype.toString.call(cat))</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>除非进行了特殊指定，否则所有对象都会从 <code>Object.prototype</code> 继承 <code>Symbol.toStringTag</code> 属性，其默认的属性值是字符串 <code>&quot;Object&quot;</code></p>
+</blockquote>
+<h6 id="Symbol-match"><a href="#Symbol-match" class="headerlink" title="Symbol.match"></a>Symbol.match</h6><p><code>Symbol.match</code> 指定了匹配的是正则表达式而不是字符串。 <code>String.prototype.match()</code> 方法会调用此函数。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = <span class="regexp">/foo/</span></span><br><span class="line"></span><br><span class="line">reg[<span class="built_in">Symbol</span>.match] = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'/foo/'</span>.startsWith(reg)) <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'/123foo123/'</span>.endsWith(reg)) <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<p>如果将 <code>Symbol.match</code> 置为 <code>false</code>，使用 <code>match</code> 属性的表达式检查会认为该象不是正则表达式对象。<code>startsWith</code> 和 <code>endsWith</code> 方法将不会抛出 <code>TypeError</code>。</p>
+<p>我们也可以使用 <code>Symbol.match</code> 定义一个正则表达式对象。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.match]: <span class="function"><span class="keyword">function</span>(<span class="params">value</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.length &gt; <span class="number">6</span> ? <span class="string">'长度大于6'</span> : <span class="string">'长度小于6'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> len1 = <span class="string">'Hello world'</span></span><br><span class="line"><span class="keyword">const</span> len2 = <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(len1.match(reg)) <span class="comment">// 长度大于6</span></span><br><span class="line"><span class="built_in">console</span>.log(len2.match(reg)) <span class="comment">// 长度小于6</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Symbol-replace"><a href="#Symbol-replace" class="headerlink" title="Symbol.replace"></a>Symbol.replace</h6><p><code>Symbol.replace</code> 这个属性指定了当一个字符串替换所匹配字符串时所调用的方法。<code>String.prototype.replace()</code> 方法会调用此方法。</p>
+<p>我们也可以使用 <code>Symbol.replace</code> 定义一个正则表达式对象。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.replace]: <span class="function"><span class="keyword">function</span>(<span class="params">value, replacement</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.length === <span class="number">11</span> ? replacement + value.substring(<span class="number">11</span>) : value</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> len1 = <span class="string">'Hello world'</span></span><br><span class="line"><span class="keyword">const</span> len2 = <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(len1.replace(reg, <span class="string">'12345'</span>)) <span class="comment">// 12345</span></span><br><span class="line"><span class="built_in">console</span>.log(len2.replace(reg, <span class="string">'12345'</span>)) <span class="comment">// Hello</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Symbol-search"><a href="#Symbol-search" class="headerlink" title="Symbol.search"></a>Symbol.search</h6><p><code>Symbol.search</code> 指定了一个搜索方法，这个方法接受用户输入的正则表达式，返回该正则表达式在字符串中匹配到的下标，这个方法由以下的方法来调用 <code>String.prototype.search()</code>。</p>
+<p>我们也可以使用 <code>Symbol.search</code> 定义一个正则表达式对象。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.search]: <span class="function"><span class="keyword">function</span>(<span class="params">value</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.length &gt; <span class="number">10</span> ? <span class="literal">true</span> : <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> len1 = <span class="string">'Hello world'</span></span><br><span class="line"><span class="keyword">const</span> len2 = <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(len1.search(reg)) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(len2.search(reg)) <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Symbol-split"><a href="#Symbol-split" class="headerlink" title="Symbol.split"></a>Symbol.split</h6><p><code>Symbol.split</code> 指向 一个正则表达式的索引处分割字符串的方法。 这个方法通过 <code>String.prototype.split()</code> 调用。</p>
+<p>我们也可以使用 <code>Symbol.split</code> 定义一个正则表达式对象。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.split]: <span class="function"><span class="keyword">function</span>(<span class="params">value</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.length &gt; <span class="number">10</span> ? [] : [value]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> len1 = <span class="string">'Hello world'</span></span><br><span class="line"><span class="keyword">const</span> len2 = <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(len1.split(reg)) <span class="comment">// []</span></span><br><span class="line"><span class="built_in">console</span>.log(len2.split(reg)) <span class="comment">// [ Hello ]</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>符号（<code>Symbol</code>）是 <strong>JS</strong> 新引入的基本类型值，可以使用它创建不可枚举的属性，并且这些属性不使用符号的情况下是无法访问的。</p>
+<p>虽然符号类型不可以创建真正的私有属性，但它们很难被修改，当我们创建一个不想被用户修改的方法时，可以去使用符号。</p>
+<p>为符号添加描述，可以更加容易判断它的作用。使用全局符号注册，允许我们在不同的代码段使用同一个符号值。</p>
+<p><code>Object.keys()</code> 或 <code>Object.getOwnPropertyNames()</code> 不会返回符号值，因此 ES6 新增了一个<code>Object.getOwnPropertySymbols()</code> 方法，允许检索符号类型的对象属性。而你依然可以使用 <code>Object.defineProperty()</code> 与 <code>Object.defineProperties()</code> 方法对符号类型的属性进行修改。</p>
+<p>“知名符号”使用了全局符号常量（例如 <code>Symbol.hasInstance</code> ），为常规对象定义了一些功<br>能，而这些功能原先仅限内部使用。这些符号按规范使用 <code>Symbol</code>. 的前缀，允许开发者通过<br>多种方式去修改常规对象的行为/<em>不过一般情况下也用不到这些方法，个人觉得了解一下即可</em>/。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/js/symbol/" data-id="ck4bd0srf000emou1awzsdbat"
+        class="article-share-link">分享</a>
+      
+
+    </footer>
+
+  </div>
+
+  
+  
+  <nav class="article-nav">
+    
+      <a href="/2019/12/16/js/stringAndRegExp/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            字符串与正则表达式
+          
+        </div>
+      </a>
+    
+    
+  </nav>
+
+
+  
+
+  
+  
+<!-- valine评论 -->
+<div id="vcomments-box">
+    <div id="vcomments">
+    </div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine@1.3.10/dist/Valine.min.js'></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        notify: false,
+        verify: false,
+        app_id: 'pUhbbBIdkBPvVbR0iVMNbxKB-gzGzoHsz',
+        app_key: '5hUYxDcuUwUe18KzRrGfF2mn',
+        path: window.location.pathname,
+        avatar: 'mp',
+        placeholder: '给我的文章加点评论吧~',
+        recordIP: true
+    });
+    const infoEle = document.querySelector('#vcomments .info');
+    if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+        infoEle.childNodes.forEach(function (item) {
+            item.parentNode.removeChild(item);
+        });
+    }
+</script>
+<style>
+    #vcomments-box {
+        padding: 5px 30px;
+    }
+
+    @media screen and (max-width: 800px) {
+        #vcomments-box {
+            padding: 5px 0px;
+        }
+    }
+
+    #vcomments-box #vcomments {
+        background-color: #fff;
+    }
+
+    .v .vlist .vcard .vh {
+        padding-right: 20px;
+    }
+
+    .v .vlist .vcard {
+        padding-left: 10px;
+    }
+</style>
+
+  
+
+  
+  
+  
+
+</article>
+</section>
+      <footer>
+  
+</footer>
+
+
+<!-- <footer class="footer">
+  <div class="outer">
+    <ul class="list-inline">
+      <li>
+        &copy;
+        2019
+        
+      </li>
+      <li>
+        
+      </li>
+    </ul>
+    <ul class="list-inline">
+      <li>
+        
+        
+        <ul class="list-inline">
+  <li>PV:<span id="busuanzi_value_page_pv"></span></li>
+  <li>UV:<span id="busuanzi_value_site_uv"></span></li>
+</ul>
+        
+      </li>
+      <li> -->
+        <!-- cnzz统计 -->
+        <!-- 
+      </li>
+    </ul>
+  </div>
+</footer> -->
+    <div class="to_top">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+      </div>
+    </main>
+    
+    <aside class="sidebar">
+      
+        <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <!-- <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt=""></a>
+  </div> -->
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">目录</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+      </aside>
+      
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+  
+<script src="/js/tocbot.min.js"></script>
+
+  <script>
+    // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+    tocbot.init({
+      tocSelector: '.tocbot',
+      contentSelector: '.article-entry',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
+      hasInnerContainers: true,
+      scrollSmooth: true,
+      positionFixedSelector: '.tocbot',
+      positionFixedClass: 'is-position-fixed',
+      fixedSidebarOffset: 'auto',
+    });
+  </script>
+
+
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+
+<script src="/js/ayer.js"></script>
+
+
+
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+     
+  </title>
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+  
+<script src="/js/pace.min.js"></script>
+
+
+  
+
+  
+
+<meta name="generator" content="Hexo 4.1.1"><link rel="alternate" href="/atom.xml" title="" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    <main class="content">
+      
+<section class="cover">
+    
+      
+      <a class="forkMe" href="https://github.com/zzzhim"
+        target="_blank"><img width="149" height="149" src="/images/forkme.png"
+          class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1"></a>
+    
+  <div class="cover-frame">
+    <div class="bg-box">
+      <img src="/images/cover1.jpg" alt="image frame" />
+    </div>
+    <div class="cover-inner text-center text-white">
+      <h2></h2>
+      <div>
+        
+      </div>
+    </div>
+  </div>
+  <div class="cover-learn-more">
+    <a href="#main" class="anchor"><i class="ri-arrow-down-line"></i></a>
+  </div>
+</section>
+
+<div id="main">
+  <section class="outer">
+  <article class="articles">
+    
+    <h1 class="page-type-title"></h1>
+
+    
+    
+    <article id="es6-js/proxy" class="article article-type-es6" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2019/12/16/js/proxy/"
+    >代理与反射接口</a
+  >
+</h2>
+  
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2019/12/16/js/proxy/" class="article-date">
+  <time datetime="2019-12-16T12:48:06.000Z" itemprop="datePublished">2019-12-16</time>
+</a>
+      
+    </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+      <h1 id="代理与反射接口"><a href="#代理与反射接口" class="headerlink" title="代理与反射接口"></a>代理与反射接口</h1><!-- **ES5** 与 **ES6** 都推进了 **JS** 功能的公开。例如，**JS** 运行环境包含一些不可枚举、不可写入的对象属性，然而在 **ES5** 之前我们无法定义它们自己的不可枚举属性或者不可写入属性。 -->
+<p><strong>ES6</strong> 为了让开发者能进一步接近 <strong>JS</strong> 引擎的能力，这些能力原先只存在于内置对象上。JS通过代理（<strong>proxy</strong>）暴露了在对象上的内部工作，代理是一种封装，能够拦截并改变 <strong>JS</strong> 引擎的底层操作。</p>
+<!-- ### 数组的问题
+在 **ES6** 之前， **JS** 的数组对象拥有特定的行为方式，无法被开发者在自定义对象中进行模拟。当 -->
+
+<h3 id="代理与反射是什么？"><a href="#代理与反射是什么？" class="headerlink" title="代理与反射是什么？"></a>代理与反射是什么？</h3><p>通过调用 <code>new proxy()</code> ，我们可以创建一个代理用来代替另一个对象（被称为代理目标），这个代理对目标对象进行了虚拟，因此该代理与该目标对象表面上可以被当作同一个对象来对待。</p>
+<p>代理允许你拦截在目标对象上的底层操作，而这原本是 <strong>JS</strong> 引擎的内部能力。拦截行为使用了一个能够响应特定操作的函数（被称为陷阱）。</p>
+<p>被 <code>Reflect</code> 对象所代表的反射接口，是给底层操作提供默认行为的方法的集合，这些操作是能够被代理重写的。每个代理陷阱都有一个对应的反射方法，每个方法都与对应的陷阱函数同名，并且接收的参数也与之一致。并且接收的参数也与之一致。下表总结了这些行为：</p>
+<blockquote>
+<p><img src="/img.png" alt="Reflect"> </p>
+</blockquote>
+<h3 id="创建一个简单的代理"><a href="#创建一个简单的代理" class="headerlink" title="创建一个简单的代理"></a>创建一个简单的代理</h3><p>当使用 <code>Proxy</code> 构造器来创建一个代理时，需要传递两个参数：目标对象以及一个处理器（<strong>handler</strong>），后者是定义了一个或多个陷阱函数的对象。如果未提供陷阱函数，代理会对所有操作采取默认行为。</p>
+<p>为了创建一个仅进行传递的代理，你需要使用不包含任何陷阱函数的处理器：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;&#125;)</span><br><span class="line"></span><br><span class="line">proxy.name = <span class="string">"proxy"</span></span><br><span class="line"><span class="built_in">console</span>.log(proxy.name)  <span class="comment">// proxy</span></span><br><span class="line"><span class="built_in">console</span>.log(target.name) <span class="comment">// proxy</span></span><br><span class="line"></span><br><span class="line">proxy.name = <span class="string">"target"</span></span><br><span class="line"><span class="built_in">console</span>.log(proxy.name)  <span class="comment">// target</span></span><br><span class="line"><span class="built_in">console</span>.log(target.name) <span class="comment">// target</span></span><br></pre></td></tr></table></figure>
+
+<p>该例中的 <code>proxy</code> 代理对象进行的所有操作最终都会传递给 <code>target</code> 目标对象。因此当我们为 <code>proxy</code> 代理对象添加 <code>name</code> 属性时，<code>target</code> 目标对象也会进行相应的变化。当然，缺少陷阱函数的代理没有什么用处，但是如果我们为它定义一个陷阱函数呢？</p>
+<h3 id="使用-set-陷阱函数验证属性值"><a href="#使用-set-陷阱函数验证属性值" class="headerlink" title="使用 set 陷阱函数验证属性值"></a>使用 set 陷阱函数验证属性值</h3><p>假如我们想要创建一个对象，并且规定该对象的属性值必须是数值，这就意味着我们每次新增属性的时候都要进行验证，并且在属性值不为数值类型的时候抛出错误。</p>
+<p>我们可以使用 <code>set</code> 陷阱函数来重写设置属性值时的默认行为，该陷阱函数能接受四个参数：</p>
+<ol>
+<li><code>trapTarget</code>：将接收属性的对象（即代理的目标对象）；</li>
+<li><code>key</code>：需要写入的属性的键（字符串类型或符号类型）；</li>
+<li><code>value</code>：将被写入属性的值；</li>
+<li><code>receiver</code>：操作发生的对象（通常是代理对象）；</li>
+</ol>
+<p><code>Reflect.set()</code> 是 <code>set</code> 陷阱函数对应的反射方法，同时也是 <code>set</code> 操作的默认行为。<br><code>Reflect.set()</code> 方法与 <code>set</code> 陷阱函数一样，能接受这四个参数，让该方法能在陷阱函数内部被方便使用。。该陷阱函数需要在属性被设置完成的情况下返回 <code>true</code> ，否则就要返回 <code>false</code>，而 <code>Reflect.set()</code> 也会基于操作是否成功而返回相应的结果。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;</span><br><span class="line">    name: <span class="string">"target"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    <span class="keyword">set</span>(trapTarget, key, value, receiver) &#123;</span><br><span class="line">        <span class="comment">// 忽略已有属性，避免影响它们</span></span><br><span class="line">        <span class="keyword">if</span>(!trapTarget.hasOwnProperty(key)) &#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="built_in">isNaN</span>(value)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">"Property must be a number."</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 添加属性</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.set(trapTarget, key, value, receiver)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加一个新属性，且添加的属性值为 number 类型</span></span><br><span class="line">proxy.count = <span class="number">1</span></span><br><span class="line"><span class="built_in">console</span>.log(proxy.count)  <span class="comment">// 1</span></span><br><span class="line"><span class="built_in">console</span>.log(target.count) <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 为已存在属性 name 赋值一个非数值类型的值</span></span><br><span class="line">proxy.name = <span class="string">"name"</span></span><br><span class="line"><span class="built_in">console</span>.log(proxy.name)  <span class="comment">// name</span></span><br><span class="line"><span class="built_in">console</span>.log(target.name) <span class="comment">// name</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误</span></span><br><span class="line">proxy.num = <span class="string">"num"</span></span><br></pre></td></tr></table></figure>
+
+<p>这段代码定义了一个代理陷阱，用于对 <code>target</code> 对象新增属性的值进行验证。此代码只验证新增属性的值，当我们为新增值添加一个非 <code>Number</code> 类型的值时，会抛出错误。</p>
+<p>使用 <code>set</code> 代理陷阱允许我们在写入属性值的时候进行拦截，而 <code>get</code> 代理陷阱则允许我们在读取属性值的时候进行拦截。</p>
+<h3 id="使用-get-陷阱函数进行对象外形验证"><a href="#使用-get-陷阱函数进行对象外形验证" class="headerlink" title="使用 get 陷阱函数进行对象外形验证"></a>使用 get 陷阱函数进行对象外形验证</h3><p><strong>JS</strong> 语言有趣但有时却令人困惑的特性之一，就是读取对象不存在的属性时并不会抛出错误，而是会把 <code>undefined</code> 当作该属性的值。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> obj = &#123;&#125;</span><br><span class="line"><span class="built_in">console</span>.log(obj.name) <span class="comment">// undefined</span></span><br></pre></td></tr></table></figure>
+
+<p>对象外形（<strong>Object Shape</strong>）指的是对象已有的属性与方法的集合。使用 <code>get</code> 陷阱函数，该陷阱函数会在读取属性时被调用，即使该属性在对象中并不存在，它能接受三个参数：</p>
+<ol>
+<li><code>trapTarget</code>：将接收属性的对象（即代理的目标对象）；</li>
+<li><code>key</code>：需要读取的属性的键（字符串类型或符号类型）；</li>
+<li><code>receiver</code>：操作发生的对象（通常是代理对象）；</li>
+</ol>
+<p><code>Reflect.get()</code> 方法同样接收这三个参数，并且默认会返回属性的值。</p>
+<p>我们可以通过 <code>get</code> 陷阱函数与 <code>Reflect.get()</code> 方法在目标属性不存在时抛出错误。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;</span><br><span class="line">    name: <span class="string">"target"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    <span class="keyword">get</span>(tarpTarget, key, receiver) &#123;</span><br><span class="line">        <span class="keyword">if</span>(!(key <span class="keyword">in</span> receiver)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">"Property "</span> + key + <span class="string">" doesn't exist."</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.get(tarpTarget, key, receiver)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(proxy.name) <span class="comment">// target</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// nme 属性不存在抛出错误</span></span><br><span class="line"><span class="built_in">console</span>.log(proxy.nme)</span><br></pre></td></tr></table></figure>
+
+<p>在此处的例子中我们使用了 <code>in</code> 来判断 <code>receiver</code> 是否存在对应的属性，之所以使用 <code>receiver</code> 并没有使用 <code>tarpTarget</code>，而是用了 <code>in</code> ，这是因为 <code>receiver</code> 本身就是拥有一个 <code>has</code> 陷阱函数的代理对象，在此处使用 <code>trapTarget</code> 会跳过 <code>has</code> 陷阱函数数，并可能给你一个错误的结果。</p>
+<h3 id="使用-has-陷阱函数隐藏属性"><a href="#使用-has-陷阱函数隐藏属性" class="headerlink" title="使用 has 陷阱函数隐藏属性"></a>使用 has 陷阱函数隐藏属性</h3><p><code>in</code> 运算符用于判定指定对象中是否存在某个属性，如果对象的属性名与指定的字符串或符号值想匹配，那么 <code>in</code> 运算符应当返回 <code>true</code>，无论该属性是对象自身的属性还是其原型的属性。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> obj1 = &#123;</span><br><span class="line">    name: <span class="string">"zzzhim"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> obj2 = <span class="built_in">Object</span>.create(obj1)</span><br><span class="line"></span><br><span class="line">obj2.sex = <span class="string">"男"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"name"</span> <span class="keyword">in</span> obj2) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"sex"</span> <span class="keyword">in</span> obj2)  <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><code>has</code> 陷阱函数会在使用 <code>in</code> 运算符的情况下被调用，并且会被传入两个参数：</p>
+<ol>
+<li><code>trapTarget</code>：需要读取属性的对象（即代理的目标对象）；</li>
+<li><code>key</code>：需要检查的属性的键（字符串类型或者符号类型）；</li>
+</ol>
+<p><code>Reflect.has()</code> 方法接受与之相同的参数，并向 <code>in</code> 运算符返回默认的响应结果。使用 <code>has</code> 陷阱函数以及 <code>Reflect.has()</code> 方法，允许你修改部分属性在接受 <code>in</code> 检测时的行为，但保留其他属性的默认行为。</p>
+<p>如下，我们想要隐藏某个属性：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;</span><br><span class="line">    name: <span class="string">"target"</span>,</span><br><span class="line">    value: <span class="number">23</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    has(trapTarget, key) &#123;</span><br><span class="line">        <span class="keyword">if</span>(key === <span class="string">"value"</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Reflect</span>.has(trapTarget, key)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"value"</span> <span class="keyword">in</span> proxy)    <span class="comment">// false</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"name"</span> <span class="keyword">in</span> proxy)     <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"toString"</span> <span class="keyword">in</span> proxy) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"valueOf"</span> <span class="keyword">in</span> proxy)  <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>我们使用 <code>has</code> 陷阱函数检测 <code>key</code> 的值是否为 <code>&quot;value&quot;</code>。如果是，则返回 <code>false</code>，否则返回默认结果。</p>
+<h3 id="使用-deleteProperty-陷阱函数避免属性被删除"><a href="#使用-deleteProperty-陷阱函数避免属性被删除" class="headerlink" title="使用 deleteProperty 陷阱函数避免属性被删除"></a>使用 deleteProperty 陷阱函数避免属性被删除</h3><p><code>delete</code> 运算符能够从指定对象上删除一个属性，在删除成功时返回 <code>true</code> ，否则返回 <code>false</code>。如果试图用 <code>delete</code> 运算符去删除一个不可配置的属性，在严格模式下将会抛出错误；非严格模式下只是单纯返回 <code>false</code>。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;</span><br><span class="line">    name: <span class="string">"target"</span>,</span><br><span class="line">    value: <span class="number">23</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(target, <span class="string">"name"</span>, &#123;</span><br><span class="line">    configurable: <span class="literal">false</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"value"</span> <span class="keyword">in</span> target) <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> result1 = <span class="keyword">delete</span> target.value;</span><br><span class="line"><span class="built_in">console</span>.log(result1) <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"value"</span> <span class="keyword">in</span> target) <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 严格模式下抛错</span></span><br><span class="line"><span class="keyword">let</span> result2 = <span class="keyword">delete</span> target.name</span><br><span class="line"><span class="built_in">console</span>.log(result2) <span class="comment">// false</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"name"</span> <span class="keyword">in</span> target) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><code>deleteProperty</code> 陷阱函数会在使用 <code>delete</code> 运算符去删除对象属性时下被调用，并且会被传入两个参数：</p>
+<ol>
+<li><code>tarpTarget</code>：需要删除属性的对象（即代理的目标对象）；</li>
+<li><code>key</code>：需要删除的属性的键（字符串类型或者符号类型）；</li>
+</ol>
+<p><code>Reflect.deleteProperty()</code> 方法也接受这两个参数，并提供了 <code>deleteProperty</code> 陷阱函数的默认实现。我们可以结合 <code>Reflect.deleteProperty()</code> 方法以及 <code>deleteProperty</code> 陷阱函数，来修改 <code>delete</code> 运算符的行为。</p>
+<p>如下，我们使用它们确保 <code>value</code> 属性不能被删除：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;</span><br><span class="line">    name: <span class="string">"target"</span>,</span><br><span class="line">    value: <span class="number">23</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    deleteProperty(trapTarget, key) &#123;</span><br><span class="line">        <span class="keyword">if</span>(key === <span class="string">"value"</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Reflect</span>.deleteProperty(trapTarget, key)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 尝试删除 value 属性</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"value"</span> <span class="keyword">in</span> proxy)   <span class="comment">// true</span></span><br><span class="line"><span class="keyword">let</span> result1 = <span class="keyword">delete</span> proxy.value</span><br><span class="line"><span class="built_in">console</span>.log(result1)            <span class="comment">// false</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"value"</span> <span class="keyword">in</span> proxy)   <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 尝试删除 proxy.name</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"name"</span> <span class="keyword">in</span> proxy)    <span class="comment">// true</span></span><br><span class="line"><span class="keyword">let</span> result2 = <span class="keyword">delete</span> proxy.name</span><br><span class="line"><span class="built_in">console</span>.log(result2)            <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"name"</span> <span class="keyword">in</span> proxy)    <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<p>这段代码允许我们在严格模式下保护属性避免其被删除，并且不会抛出错误。</p>
+<h3 id="原型代理的陷阱函数"><a href="#原型代理的陷阱函数" class="headerlink" title="原型代理的陷阱函数"></a>原型代理的陷阱函数</h3><p>代理允许通过 <code>setPrototypeOf</code> 与 <code>getPrototypeOf</code> 陷阱函数来对这两个方法的操作进行拦截。<code>Object</code> 对象上的这两个方法都会调用代理中对应名称的陷阱函数，从而允许你改变这两个方法的行为。</p>
+<p>由于存在着两个陷阱函数与原型代理相关联，因此分别有一组方法对应着每个陷阱函数。</p>
+<p><code>setPrototypeOf</code> 陷阱函数接受两个参数：</p>
+<ol>
+<li><code>tarpTarget</code>：需要设置原型的对象（即代理的目标对象）；</li>
+<li><code>proto</code>：被用作原型的对象；</li>
+</ol>
+<p><code>Object.setPrototypeOf()</code> 方法与 <code>Reflect.setPrototypeOf()</code> 方法会被传入相同的参数。另一方面， <code>getPrototypeOf</code> 陷阱函数只接受 <code>trapTarget</code> 参数， <code>Object.getPrototypeOf()</code> 方法与 <code>Reflect.getPrototypeOf()</code> 方法也是如此。</p>
+<blockquote>
+<p>原文的例子如下：<br>下面这个例子通过返回 <code>null</code> 隐藏了代理对象的原型，并且使得该原型不可被修改：</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;&#125;;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    getPrototypeOf(trapTarget) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;,</span><br><span class="line">    setPrototypeOf(trapTarget, proto) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">let</span> targetProto = <span class="built_in">Object</span>.getPrototypeOf(target);</span><br><span class="line"><span class="keyword">let</span> proxyProto = <span class="built_in">Object</span>.getPrototypeOf(proxy);</span><br><span class="line"><span class="built_in">console</span>.log(targetProto === <span class="built_in">Object</span>.prototype); <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(proxyProto === <span class="built_in">Object</span>.prototype); <span class="comment">// false</span></span><br><span class="line"><span class="built_in">console</span>.log(proxyProto); <span class="comment">// null</span></span><br><span class="line"><span class="comment">// 成功</span></span><br><span class="line"><span class="built_in">Object</span>.setPrototypeOf(target, &#123;&#125;);</span><br><span class="line"><span class="comment">// 抛出错误</span></span><br><span class="line"><span class="built_in">Object</span>.setPrototypeOf(proxy, &#123;&#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>当我试图在控制台执行原文的例子时，Chrome浏览器会抛出 <code>&#39;getPrototypeOf&#39; on proxy: trap returned neither object nor null</code> ，原因是因为在 <code>getPrototypeOf</code> 返回了一个 <code>null</code>，具体为什么会抛出错误，我也没有找到原因。因此我在上述例子中稍微做了一些修改：</p>
+</blockquote>
+<p>下面的例子通过返回原型为 <code>null</code> 的空对象，隐藏了代理对象的原型，并且使得该原型不可被修改：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    getPrototypeOf(trapTarget) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Object</span>.create(<span class="literal">null</span>)</span><br><span class="line">    &#125;,</span><br><span class="line">    setPrototypeOf(trapTarget, proto) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> proxyProto = <span class="built_in">Object</span>.getPrototypeOf(proxy)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(proxyProto) <span class="comment">// 原型为 `null` 的空对象</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误</span></span><br><span class="line"><span class="built_in">Object</span>.setPrototypeOf(proxy, &#123;&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>如果我们想在两个陷阱函数中使用默认的行为，那么只需调用 <code>Reflect</code> 对象上的相应方法。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    getPrototypeOf(trapTarget) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.getPrototypeOf(trapTarget)</span><br><span class="line">    &#125;,</span><br><span class="line">    setPrototypeOf(trapTarget, proto) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.setPrototypeOf(trapTarget, proto)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> targetProto = <span class="built_in">Object</span>.getPrototypeOf(target)</span><br><span class="line"><span class="keyword">let</span> proxyProto =  <span class="built_in">Object</span>.getPrototypeOf(proxy)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(targetProto === <span class="built_in">Object</span>.prototype) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(proxyProto === <span class="built_in">Object</span>.prototype)  <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 成功</span></span><br><span class="line"><span class="built_in">Object</span>.setPrototypeOf(target, &#123;&#125;)</span><br><span class="line"><span class="comment">// 同样成功</span></span><br><span class="line"><span class="built_in">Object</span>.setPrototypeOf(proxy, &#123;&#125;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="两组方法的不同之处"><a href="#两组方法的不同之处" class="headerlink" title="两组方法的不同之处"></a>两组方法的不同之处</h3><p><code>Reflect.getPrototypeOf()</code> 和 <code>Reflect.setPrototypeOf</code> 虽然看起来与 <code>Object.getPrototypeOf()</code> 和 <code>Object.setPrototypeOf</code> 很相似，但它们两个之间仍然有着显著差异。</p>
+<p>首先 <code>Object.getPrototypeOf()</code> 和 <code>Object.setPrototypeOf</code> 属于高级操作，从产生之初便已提供给开发者使用；而 <code>Reflect.getPrototypeOf()</code> 和 <code>Reflect.setPrototypeOf</code> 属于底层操作，允许开发者访问 <code>[[GetPrototypeOf]]</code> 与 <code>[[SetPrototypeOf]]</code> 这两个原先仅供语言内部使用的操作。</p>
+<p><code>Reflect.getPrototypeOf()</code> 方法是对内部的 <code>[[GetPrototypeOf]]</code> 操作的封装（并且附加了一些输入验证），而 <code>Reflect.setPrototypeOf()</code> 方法与 <code>[[SetPrototypeOf]]</code> 操作之间也有类似的关系。</p>
+<p>虽然 <code>Object</code> 对象上的同名方法也调用了 <code>[[GetPrototypeOf]]</code> 与 <code>[[SetPrototypeOf]]</code> ，但它们在调用这两个操作之前添加了一些步骤、并检查返回值，以决定如何行动。</p>
+<p><code>Reflect.getPrototypeOf()</code> 方法在接收到的参数不是一个对象时会抛出错误，而 <code>Object.getPrototypeOf()</code> 则会在操作之前先将参数值转换为一个对象。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> result = <span class="built_in">Object</span>.getPrototypeOf(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(result === <span class="built_in">Number</span>.prototype) <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛错</span></span><br><span class="line"><span class="built_in">Reflect</span>.getPrototypeOf(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p><code>Reflect.setPrototypeOf()</code> 方法方法返回一个布尔值用于表示操作是否已成功，成功时返回 <code>true</code> ，失败时返回 <code>false</code>； <code>Object.setPrototypeOf()</code> 方法的操作失败时，它会抛出错误。<code>Object.setPrototypeOf()</code> 方法会将传入的第一个参数作为自身的返回值，因此并不适合用来实现 <code>setPrototypeOf</code> 代理陷阱的默认行为。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target1 = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> result1 = <span class="built_in">Object</span>.setPrototypeOf(target1, &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(result1 === target1) <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> target2 = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> result2 = <span class="built_in">Reflect</span>.setPrototypeOf(target2, &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(result2 === target2) <span class="comment">// false</span></span><br><span class="line"><span class="built_in">console</span>.log(result2) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="对象可扩展性的陷阱函数"><a href="#对象可扩展性的陷阱函数" class="headerlink" title="对象可扩展性的陷阱函数"></a>对象可扩展性的陷阱函数</h3><p>ES5 通过 <code>Object.preventExtensions()</code> 与 <code>Object.isExtensible()</code> 方法给对象增加了可扩展<br>性。</p>
+<p>ES6 通过 <code>preventExtensions</code> 与 <code>isExtensible</code> 陷阱函数允许代理拦截对于底层对象的方法调用。这两个陷阱函数都接受名为 <code>trapTarget</code> 的单个参数，此参数代表方法在哪个对象上被调用。同时 <code>Reflect</code> 上面也存在对应的  <code>Reflect.preventExtensions()</code> 与 <code>Reflect.isExtensible()</code> 方法，用于实现默认的行为。这两个方法都返回布尔值，因此它们可以在对应的陷阱函数内直接使用。</p>
+<blockquote>
+<p><code>Object.isExtensible()</code> 方法判断一个对象是否是可扩展的（是否可以在它上面添加新的属性）。</p>
+<p><code>Object.preventExtensions()</code> 方法让一个对象变的不可扩展，也就是永远不能再添加新的属性。</p>
+</blockquote>
+<h6 id="两个基本范例"><a href="#两个基本范例" class="headerlink" title="两个基本范例"></a>两个基本范例</h6><p>下列代码实现了 <code>isExtensible</code> 与 <code>preventExtensions</code> 陷阱函数的默认行为。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    isExtensible(trapTarget) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.isExtensible(trapTarget)</span><br><span class="line">    &#125;,</span><br><span class="line">    preventExtensions(trapTarget) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.preventExtensions(trapTarget)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.isExtensible(target)) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.isExtensible(proxy)) <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 正常运行</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(target, <span class="string">"name"</span>, &#123; <span class="attr">value</span>: <span class="string">"zzzhim"</span> &#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 让对象变得不可扩展</span></span><br><span class="line"><span class="built_in">Object</span>.preventExtensions(proxy)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.isExtensible(target)) <span class="comment">// false</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.isExtensible(proxy)) <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误：Cannot define property value, object is not extensible</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(target, <span class="string">"value"</span>, &#123; <span class="attr">value</span>: <span class="number">111</span> &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>我们也可以在 <code>preventExtensions</code> 陷阱函数上返回 <code>false</code>，来让代理上的 <code>Object.preventExtensions()</code> 操作失败。如下：</p>
+<blockquote>
+<p>原文代码如下：</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    isExtensible(trapTarget) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.isExtensible(trapTarget)</span><br><span class="line">    &#125;,</span><br><span class="line">    preventExtensions(trapTarget) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.isExtensible(target)) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.isExtensible(proxy)) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">Object</span>.preventExtensions(proxy)</span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.isExtensible(target)) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.isExtensible(proxy)) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>此代码在 <code>Chrome</code> 和 <code>FireFox</code> 执行时分别会抛出 <code>&#39;preventExtensions&#39; on proxy: trap returned falsish at Function.preventExtensions</code> 和 <code>proxy preventExtensions handler returned false</code> 错误。</p>
+</blockquote>
+<p>!&gt; <code>Object.isExtensible()</code> 方法与 <code>Reflect.isExtensible()</code> 方法几乎一样，只在接收到的参数不是一个对象时才有例外。此时 <code>Object.isExtensible()</code> 总是会返回 <code>false</code> ，而 <code>Reflect.isExtensible()</code> 则会抛出一个错误。</p>
+<h3 id="属性描述符的陷阱函数"><a href="#属性描述符的陷阱函数" class="headerlink" title="属性描述符的陷阱函数"></a>属性描述符的陷阱函数</h3><p>ES5 的最重要的特征之一就是引入了 <code>Object.defineProperty()</code> 方法用于定义属性的特征，它能让我们直接在一个对象上定义一个新属性，或者修改一个对象的现有属性，并且能让属性变成只读或是不可枚举的。我们还可以利用 <code>Object.getOwnPropertyDescriptor()</code> 方法检索这些特性。</p>
+<p>代理允许我们使用 <code>defineProperty</code> 与 <code>getOwnPropertyDescriptor</code> 陷阱函数，来分别拦截对于 <code>Object.defineProperty()</code> 与 <code>Object.getOwnPropertyDescriptor()</code>。</p>
+<p><code>defineProperty</code> 陷阱函数接受下列三个参数：</p>
+<ol>
+<li><code>trapTarget</code> ：需要被定义属性的对象（即代理的目标对象）；</li>
+<li><code>key</code> ：属性的键（字符串类型或符号类型）；</li>
+<li><code>descriptor</code> ：为该属性准备的描述符对象。</li>
+</ol>
+<p><code>defineProperty</code> 陷阱函数要求你在操作成功时返回 <code>true</code> ，否则返回 <code>false</code> 。 <code>getOwnPropertyDescriptor</code> 陷阱函数则只接受 <code>trapTarget</code> 与 <code>key</code> 这两个参数，并会返回对应的描述符。 <code>Reflect.defineProperty()</code> 与 <code>Reflect.getOwnPropertyDescriptor()</code> 方法作为上述陷阱函数的对应方法，接受与之相同的参数。</p>
+<p>此代码实现了每个陷阱函数的默认行为，如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    defineProperty(trapTarget, key, descriptor) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.defineProperty(trapTarget, key, descriptor)</span><br><span class="line">    &#125;,</span><br><span class="line">    getOwnPropertyDescriptor(trapTarget, key) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.getOwnPropertyDescriptor(trapTarget, key)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(proxy, <span class="string">"name"</span>, &#123;</span><br><span class="line">    value: <span class="string">"zzzhim"</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(proxy.name) <span class="comment">// "zzzhim"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> descriptor = <span class="built_in">Object</span>.getOwnPropertyDescriptor(proxy, <span class="string">"name"</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(descriptor.value) <span class="comment">// "zzzhim"</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="阻止-Object-defineProperty"><a href="#阻止-Object-defineProperty" class="headerlink" title="阻止 Object.defineProperty()"></a>阻止 Object.defineProperty()</h3><p><code>defineProperty</code> 陷阱函数要求你返回一个布尔值用于表示操作是否已成功。当它返回 <code>true</code> 时， <code>Object.defineProperty()</code> 会正常执行；如果它返回 <code>false</code> ，则会抛出错误。我们可以利用这个特性，来限制可以被 <code>Object.defineProperty()</code> 的属性。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, &#123;</span><br><span class="line">    defineProperty(trapTarget, key, descriptor) &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">typeof</span> key === <span class="string">"symbol"</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.defineProperty(trapTarget, key, descriptor)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> symbol = <span class="built_in">Symbol</span>(<span class="string">"name"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(proxy, symbol, &#123;</span><br><span class="line">    value: <span class="string">"zzzhim"</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>当 <code>key</code> 值为 <code>Symbol</code> 类型时，我们在 <code>defineProperty</code> 陷阱函数中返回 <code>false</code>，导致程序抛出错误。</p>
+<blockquote>
+<p>你可以让陷阱函数返回 <code>true</code> ，同时不去调用 <code>Reflect.defineProperty()</code> 方法，这样 <code>Object.defineProperty()</code> 就会静默失败，如此便可在未实际去定义属性的情况下抑制运行错误。</p>
+</blockquote>
+<h3 id="描述符对象的限制"><a href="#描述符对象的限制" class="headerlink" title="描述符对象的限制"></a>描述符对象的限制</h3><p>为了确保 <code>Object.defineProperty()</code> 与 <code>Object.getOwnPropertyDescriptor()</code> 方法的行为一致，传递给 <code>defineProperty</code> 陷阱函数的描述符对象必须是正规的。出于同一原因， <code>getOwnPropertyDescriptor</code> 陷阱函数返回的对象也始终需要被验证。</p>
+<p>任意对象都能作为 <code>Object,defineProperty()</code> 方法的第三个参数；然而能够传递给 <code>defineProperty</code> 陷阱函数的描述对象参数，则只有 <code>enumerable</code>、 <code>configurable</code> 、 <code>value</code> 、 <code>writable</code> 、 <code>get</code> 与 <code>set</code> 这些属性。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;, &#123;</span><br><span class="line">    defineProperty(trapTarget, key, descriptor) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(descriptor) <span class="comment">// 描述对象输出 &#123;&#123; value: value &#125;&#125; 并没有 name 属性</span></span><br><span class="line">        <span class="keyword">return</span>  <span class="built_in">Reflect</span>.defineProperty(trapTarget, key, descriptor)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(proxy, <span class="string">"name"</span>, &#123;</span><br><span class="line">    value: <span class="string">"value"</span>,</span><br><span class="line">    name: <span class="string">"zzzhim"</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p><code>getOwnPropertyDescriptor</code> 陷阱函数有一个微小差异，要求返回值必须是 <code>null</code> 、 <code>undefined</code> ，或者是一个对象。当返回值是一个对象时，只允许该对象拥有 <code>enumerable</code>、 <code>configurable</code> 、 <code>value</code> 、 <code>writable</code> 、 <code>get</code> 与 <code>set</code> 这些属性。如果返回的对象包含了不被许可的自有属性，则程序会抛出错误。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;, &#123;</span><br><span class="line">    getOwnPropertyDescriptor(trapTarget, key) &#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            name: <span class="string">"zzzhim"</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛错</span></span><br><span class="line"><span class="built_in">Object</span>.getOwnPropertyDescriptor(proxy, <span class="string">"name"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>?&gt; <code>Object.getOwnPropertyDescriptor()</code> 的返回值总是拥有可信任的结构，无论是否使用了代理。</p>
+<h3 id="重复的描述符方法"><a href="#重复的描述符方法" class="headerlink" title="重复的描述符方法"></a>重复的描述符方法</h3><h6 id="defineProperty-方法"><a href="#defineProperty-方法" class="headerlink" title="defineProperty() 方法"></a>defineProperty() 方法</h6><p><code>Object.defineProperty()</code> 方法与 <code>Reflect.defineProperty()</code> 方法几乎一模一样，只是返回值有区别。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> result1 = <span class="built_in">Object</span>.defineProperty(target, <span class="string">"name"</span>, &#123; <span class="attr">value</span>: <span class="string">"target"</span> &#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(target === result1) <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> result2 = <span class="built_in">Reflect</span>.defineProperty(target, <span class="string">"name"</span>, &#123; <span class="attr">value</span>: <span class="string">"target"</span> &#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(result2) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>?&gt; 如上，前者返回的是调用它时的第一个参数，而后者在操作成功时返回 <code>true</code> 、失败时返回 <code>false</code>。</p>
+<h6 id="getOwnPropertyDescriptor-方法"><a href="#getOwnPropertyDescriptor-方法" class="headerlink" title="getOwnPropertyDescriptor() 方法"></a>getOwnPropertyDescriptor() 方法</h6><p><code>Object.getOwnPropertyDescriptor()</code> 方法会在接收的第一个参数是基本类型值时，将该参数转化为对象。而 <code>Reflect.getOwnPropertyDescriptor()</code> 方法则会在第一个参数是基本类型值的时候抛出错误。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> descriptor1 = <span class="built_in">Object</span>.getOwnPropertyDescriptor(<span class="number">2</span>, <span class="string">"name"</span>)</span><br><span class="line"><span class="built_in">console</span>.log(descriptor1) <span class="comment">// undefined</span></span><br><span class="line"><span class="comment">// 抛出错误</span></span><br><span class="line"><span class="keyword">let</span> descriptor2 = <span class="built_in">Reflect</span>.getOwnPropertyDescriptor(<span class="number">2</span>, <span class="string">"name"</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="ownKeys-陷阱函数"><a href="#ownKeys-陷阱函数" class="headerlink" title="ownKeys 陷阱函数"></a>ownKeys 陷阱函数</h3><p><code>ownKeys</code> 代理陷阱拦截了内部方法 <code>[[OwnPropertyKeys]]</code> ，并允许你返回一个数组用于重写该行为。返回的这个数组会被用于四个方法：</p>
+<ol>
+<li><code>Object.keys()</code> 方法；</li>
+<li><code>Object.getOwnPropertyNames()</code> 方法；</li>
+<li><code>Object.getOwnPropertySymbols()</code> 方法；</li>
+<li><code>Object.assign()</code> 方法；</li>
+</ol>
+<p>?&gt; 其中 <code>Object.assign()</code> 方法会使用该数组来决定哪些属性会被复制。</p>
+<p><code>ownKeys</code> 陷阱函数的默认行为由 <code>Reflect.ownKeys()</code> 方法实现，会返回一个由全部自有属性的键构成的数组，无论键的类型是字符串还是符号。</p>
+<p><code>Object.getOwnPropertyNames()</code> 方法与 <code>Object.keys()</code> 方法会将符号值从该数组中过滤出去；</p>
+<p><code>Object.getOwnPropertySymbols()</code> 会将字符串值过滤掉；</p>
+<p><code>Object.assign()</code> 方法会使用数组中所有的字符串值与符号值；</p>
+<p><code>ownKeys</code> 陷阱函数接受单个参数，即目标对象，同时必须返回一个数组或者一个类数组对象，不合要求的返回值会导致错误。我们可以使用 <code>ownKeys</code> 陷阱函数去过滤特定的属性，以避免这些属性被 <code>Object.keys()</code> 方法，<code>Object.getOwnPropertyNames()</code> 、<code>Object.getOwnPropertySymbols()</code> 、<code>Object.assign()</code>方法使用。</p>
+<p>如下，我们过滤掉名为 <code>name</code> 的属性：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;, &#123;</span><br><span class="line">    ownKeys(trapTarget) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.ownKeys(trapTarget).filter(<span class="function"><span class="params">key</span> =&gt;</span> key !== <span class="string">"name"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">proxy.name = <span class="string">"zzzhim"</span></span><br><span class="line">proxy.age = <span class="number">23</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> keys = <span class="built_in">Object</span>.keys(proxy)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(keys) <span class="comment">// [ age ]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> names = <span class="built_in">Object</span>.getOwnPropertyNames(proxy)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(names) <span class="comment">// [ age ]</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>ownKeys</code> 陷阱函数也能影响 <code>for-in</code> 循环，因为这种循环调用了陷阱函数来决定哪些值能够被用在循环内。</p>
+</blockquote>
+<h3 id="使用-apply-与-construct-陷阱函数的函数代理"><a href="#使用-apply-与-construct-陷阱函数的函数代理" class="headerlink" title="使用 apply 与 construct 陷阱函数的函数代理"></a>使用 apply 与 construct 陷阱函数的函数代理</h3><p>在所有的代理陷阱中，只有 <code>apply</code> 与 <code>construct</code> 要求代理目标对象必须是一个函数。</p>
+<p>之前提到过，函数拥有两个内部方法：<code>[[Call]]</code> 与 <code>[[Construct]]</code> ，前者会在函数被直接调用时执行，而后者会在函数被使用 <code>new</code> 运算符调用时执行。<code>[[Call]]</code> 会在函数被直接调用时执行，而后者会在函数被使用 <code>new</code> 运算符调用时执行。</p>
+<p><code>apply</code> 与 <code>construct</code> 陷阱函数对应着这两个内部方法，并允许我们对其进行重写。当不使用 <code>new</code> 去调用一个函数时， <code>apply</code> 陷阱函数会接收到下列三个参数（<code>Reflect.apply()</code> 也会接收这些参数）：</p>
+<ol>
+<li><code>trapTarget</code>：被执行的函数（即代理的目标对象）；</li>
+<li><code>thisArg</code>：调用过程中函数内部的 <code>this</code> 值；</li>
+<li><code>argumentsList</code>：被传递给函数的参数数组；</li>
+</ol>
+<p>当使用 <code>new</code> 去执行函数时，<code>construct</code> 陷阱函数会被调用并接收到下列两个参数：</p>
+<ol>
+<li><code>trapTarget</code>：被执行的函数（即代理的目标对象）；</li>
+<li><code>argumentsList</code>：被传递给函数的参数数组；</li>
+</ol>
+<p><code>Reflect.construct()</code> 方法同样会接收到这两个参数，还会收到可选的第三个参数 <code>newTarget</code>，如果提供了此参数，则它就指定了函数内部的 <code>new.target</code> 值。</p>
+<p><code>apply</code> 与 <code>construct</code>陷阱函数结合起来就能够完全控制任意目标对象函数的行为。</p>
+<p>模拟函数的默认行为，如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> targetFun = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">23</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(targetFun, &#123;</span><br><span class="line">    apply(trapTarget, thisArg, argumentsList) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.apply(trapTarget, thisArg, argumentsList)</span><br><span class="line">    &#125;,</span><br><span class="line">    construct(trapTarget, argumentsList) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.construct(trapTarget, argumentsList)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用了函数的代理，其目标对象会被视为函数</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> proxy) <span class="comment">// function</span></span><br><span class="line"><span class="built_in">console</span>.log(proxy()) <span class="comment">// 23</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> instance = <span class="keyword">new</span> proxy()</span><br><span class="line"><span class="built_in">console</span>.log(instance <span class="keyword">instanceof</span> proxy) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(instance <span class="keyword">instanceof</span> targetFun) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="验证函数的参数"><a href="#验证函数的参数" class="headerlink" title="验证函数的参数"></a>验证函数的参数</h3><p><code>apply</code> 与 <code>construct</code> 陷阱函数在函数的执行方式上开启了很多的可能性。</p>
+<p>如下，我们可以通过 <code>apply</code> 陷阱函数保证参数必须是数值类型，并且函数不能使用 <code>new</code> 调用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sum = <span class="function"><span class="keyword">function</span> (<span class="params">...values</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(values)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> sumProxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(sum, &#123;</span><br><span class="line">    apply(trapTarget, thisArg, argumentsList) &#123;</span><br><span class="line">        argumentsList.forEach(<span class="function"><span class="params">value</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="keyword">typeof</span> value !== <span class="string">"number"</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">"All arguments must be numbers."</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.apply(trapTarget, thisArg, argumentsList)</span><br><span class="line">    &#125;,</span><br><span class="line">    construct(trapTarget, argumentsList) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">"This function can't be called with new."</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(sumProxy(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)) <span class="comment">// [ 1, 2, 3, 4 ]</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(sumProxy(<span class="string">"1"</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="string">"4"</span>)) <span class="comment">// 抛错</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> newSum = <span class="keyword">new</span> sumProxy()  <span class="comment">// 抛错</span></span><br></pre></td></tr></table></figure>
+
+<p>相反的，你也可以限制函数必须使用 <code>new</code> 运算符调用，同时确保它的参数都是数值。</p>
+<h3 id="调用构造器而无须使用-new"><a href="#调用构造器而无须使用-new" class="headerlink" title="调用构造器而无须使用 new"></a>调用构造器而无须使用 new</h3><p>前面介绍了我们可以通过 <code>new.target</code> 来判断函数是否使用了 <code>new</code>。就像这样：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Numbers</span>(<span class="params">...values</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">typeof</span> <span class="keyword">new</span>.target === <span class="string">"undefined"</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">"This function must be called with new."</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.values = values</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> instance = <span class="keyword">new</span> Numbers(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(instance.values) <span class="comment">// [ 1, 2, 3 ]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误</span></span><br><span class="line">Numbers(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+
+<p>上面的这个例子，<code>Numbers</code> 函数必须要使用 <code>new</code> 才能够正常执行，在用户不知情的情况下，通常会造成不必要的错误。我们可以使用 <code>apply</code> 陷阱函数来规避必须使用 <code>new</code> 调用这个限制，如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Numbers</span>(<span class="params">...values</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">typeof</span> <span class="keyword">new</span>.target === <span class="string">"undefined"</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">"This function must be called with new."</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.values = values</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(Numbers, &#123;</span><br><span class="line">    apply(trapTarget, thisArg, argumentsList) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.construct(trapTarget, argumentsList)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> instance1 = <span class="keyword">new</span> proxy(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(instance1.values) <span class="comment">// [ 1, 2, 3 ]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> instance2 = proxy(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(instance2.values) <span class="comment">// [ 1, 2, 3 ]</span></span><br></pre></td></tr></table></figure>
+
+<p><code>proxy</code> 函数允许我们调用 <code>Numbers</code> 并且无须使用 <code>new</code> ，并且这种调用方式的效果与使用 <code>new</code> 是完全一致的。</p>
+<h3 id="可被调用的类构造器"><a href="#可被调用的类构造器" class="headerlink" title="可被调用的类构造器"></a>可被调用的类构造器</h3><p>前面说明了构造器必须始终使用 <code>new</code> 来调用，原因是类构造器的内部方法 <code>[[Call]]</code> 被明确要求抛出错误。然而代理可以拦截对于 <code>[[Call]]</code> 方法的调用，意味着我们可以借助代理创建一个可以被直接调用的类构造器。</p>
+<p>如下，我们想让类构造器不使用 <code>new</code> 的情况下也能够正常工作，我们可以使用 <code>apply</code> 陷阱函数来创建一个新的实例：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(name) &#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> PersonProxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(Person, &#123;</span><br><span class="line">    apply(trapTarget, thisArg, argumentsList) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> trapTarget(...argumentsList)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> obj = PersonProxy(<span class="string">"zzzhim"</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(obj.name) <span class="comment">// zzzhim</span></span><br><span class="line"><span class="built_in">console</span>.log(obj <span class="keyword">instanceof</span> Person) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="可被撤销的代理"><a href="#可被撤销的代理" class="headerlink" title="可被撤销的代理"></a>可被撤销的代理</h3><p>代理在被创建之后，通常就不能再从目标对象上被解绑了。我之前使用的例子都是使用了不可被撤销的代理。</p>
+<p>有些情况下我们可能想要撤销一个代理使它不能够再被使用。我们可以使用 <code>Proxy.revocable()</code> 方法来创建一个可被撤销的代理，该方法接收的参数与 <code>Proxy</code> 构造器相同：</p>
+<ol>
+<li><code>proxy</code>：可被撤销的代理对象；</li>
+<li><code>revoke</code>：用于撤销代理的函数；</li>
+</ol>
+<p>当 <code>revoke()</code> 函数被调用后，就不能再对该 <code>proxy</code> 对象进行更多操作，任何与该代理对象交互的意图都会触发代理的陷阱函数，从而抛出一个错误。</p>
+<p>如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> target = &#123;</span><br><span class="line">    name: <span class="string">"zzzhim"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> &#123; proxy, revoke &#125; = <span class="built_in">Proxy</span>.revocable(target, &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(proxy.name) <span class="comment">// zzzhim</span></span><br><span class="line"></span><br><span class="line">revoke()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误</span></span><br><span class="line"><span class="built_in">console</span>.log(proxy.name)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/js/proxy/" data-id="ck4bd0sr2000cmou175gvej74"
+        class="article-share-link">分享</a>
+      
+
+    </footer>
+
+  </div>
+
+  
+
+  
+  
+  
+
+  
+
+</article>
+    
+    <article id="es6-js/stringAndRegExp" class="article article-type-es6" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2019/12/16/js/stringAndRegExp/"
+    >字符串与正则表达式</a
+  >
+</h2>
+  
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2019/12/16/js/stringAndRegExp/" class="article-date">
+  <time datetime="2019-12-16T12:48:06.000Z" itemprop="datePublished">2019-12-16</time>
+</a>
+      
+    </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+      <h1 id="字符串与正则表达式"><a href="#字符串与正则表达式" class="headerlink" title="字符串与正则表达式"></a>字符串与正则表达式</h1><p>建议读一下这篇文章：<a href="http://www.fmddlmyy.cn/text6.html" target="_blank" rel="noopener">谈谈Unicode编码，简要解释UCS、UTF、BMP、BOM等名词</a></p>
+<h3 id="新增的一些方法"><a href="#新增的一些方法" class="headerlink" title="新增的一些方法"></a>新增的一些方法</h3><ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt" target="_blank" rel="noopener">codePointAt()</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/fromCodePoint" target="_blank" rel="noopener">String.fromCodePoint()</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize" target="_blank" rel="noopener">normalize()</a></li>
+</ul>
+<h3 id="正则表达式u标志"><a href="#正则表达式u标志" class="headerlink" title="正则表达式u标志"></a>正则表达式<strong>u</strong>标志</h3><ul>
+<li>当切换到<strong>u</strong>标志的时候，使用unicode码的模式进行匹配。</li>
+<li>当切换到<strong>y</strong>标志的时候，使用“粘性”搜索,匹配从目标字符串的当前位置开始，可以使用y标志。</li>
+</ul>
+<h3 id="识别字符串是否存在于其它字符串中的方法"><a href="#识别字符串是否存在于其它字符串中的方法" class="headerlink" title="识别字符串是否存在于其它字符串中的方法"></a>识别字符串是否存在于其它字符串中的方法</h3><ul>
+<li><strong>includes()</strong> 方法，在给定文本存在于字符串中的任意位置时会返回 <code>true</code>，否则返回 <code>false</code>。</li>
+<li><strong>startsWith()</strong> 方法，在给定文本出现在字符串起始处时返回 <code>true</code>，否则返回 <code>false</code>。</li>
+<li><strong>endsWith()</strong> 方法，在给定文本出现在字符串结尾处时返回 <code>true</code>，否则返回 <code>false</code>。</li>
+</ul>
+<p>以上的方法都接受两个参数：第一个参数搜索的文本，以及可选的搜索起始位置索引。<br>当提供了第二个参数的时候，<code>includes()</code>和<code>startsWith()</code>方法会从该索引位置开始尝试匹配；而<code>endsWith()</code>方法会将字符串长度减去该参数，以此为起点开始尝试匹配。<br>当不提供第二个参数的时候，<code>includes()</code>和<code>startsWith()</code>方法会从字符串起始处开始查找，而<code>endsWith()</code>方法则从尾部开始。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> str = <span class="string">"Hello world !"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(str.includes(<span class="string">'world'</span>))   <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(str.startsWith(<span class="string">'Hello'</span>)) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(str.endsWith(<span class="string">'!'</span>))       <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(str.includes(<span class="string">'a'</span>))       <span class="comment">// false</span></span><br><span class="line"><span class="built_in">console</span>.log(str.startsWith(<span class="string">'!'</span>))     <span class="comment">// false</span></span><br><span class="line"><span class="built_in">console</span>.log(str.endsWith(<span class="string">'Hello'</span>))   <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(str.startsWith(<span class="string">"o"</span>, <span class="number">4</span>))  <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(str.endsWith(<span class="string">"o"</span>, <span class="number">8</span>))    <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(str.includes(<span class="string">"o"</span>, <span class="number">8</span>))    <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="repeat-方法"><a href="#repeat-方法" class="headerlink" title="repeat() 方法"></a>repeat() 方法</h3><p><code>repeat()</code> 方法，它接受一个参数作为字符串的重复次数，返回一个将初始字符串重复指定次数的新字符串。如下</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(<span class="string">'x'</span>.repeat(<span class="number">4</span>))        <span class="comment">// xxxx</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'你好'</span>.repeat(<span class="number">4</span>))     <span class="comment">// 你好你好你好你好</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'zzzhim'</span>.repeat(<span class="number">4</span>))  <span class="comment">// zzzhimzzzhimzzzhimzzzhim</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="flags属性"><a href="#flags属性" class="headerlink" title="flags属性"></a>flags属性</h3><p>ES6新增了 <code>flags</code> 属性用于配合 <code>source</code> 属性，让标志的获取变得更容易。这两个属性均为只有 <code>getter</code> 的原型访问器属性，因此都是只读的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = <span class="regexp">/ab/g</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(reg.source) <span class="comment">// ab</span></span><br><span class="line"><span class="built_in">console</span>.log(reg.flags)  <span class="comment">// g</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="模板字面量"><a href="#模板字面量" class="headerlink" title="模板字面量"></a>模板字面量</h3><p>模板字面量 是允许嵌入表达式的字符串字面量。让我们可以通过使用模板字面量的方式进行多行字符串和字符串插值功能。</p>
+<h6 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h6><p>模板字面量是使用 <strong>反引号(``)</strong> 来代替普通字符串中的双引号和单引号。<br>模板字符串可以通过 <strong>(`${}`)</strong> 来插入变量和表达式等。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> a = <span class="string">'world'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> str = <span class="string">`Hello <span class="subst">$&#123;a&#125;</span>!`</span></span><br><span class="line"><span class="keyword">const</span> str1 = <span class="string">`1 + 2 = <span class="subst">$&#123;<span class="number">1</span> + <span class="number">2</span>&#125;</span>`</span></span><br><span class="line"><span class="built_in">console</span>.log(str)  <span class="comment">// Hello world!</span></span><br><span class="line"><span class="built_in">console</span>.log(str1) <span class="comment">// 1 + 2 = 3</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="标签化模板"><a href="#标签化模板" class="headerlink" title="标签化模板"></a>标签化模板</h6><p>一个模板标签（ template tag ）能对模板字面量进行转换并返回最终的字符串值，标签在模板的起始处被指定，即在第一个 ` 之前。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">tag</span>(<span class="params">literals, ...substitutions</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> str = <span class="string">''</span></span><br><span class="line">    <span class="keyword">let</span> len = literals.length &gt; substitutions.length ? literals.length : substitutions.length</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回一个字符串</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">        str += literals[i] ? literals[i] : <span class="string">''</span></span><br><span class="line">        str += substitutions[i] ? substitutions[i] : <span class="string">''</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> str</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> str = <span class="string">'world'</span></span><br><span class="line"><span class="keyword">let</span> message = tag<span class="string">`Hello <span class="subst">$&#123;str&#125;</span>! 您<span class="subst">$&#123;<span class="string">'好'</span>&#125;</span>啊!`</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(message) <span class="comment">// "Hello world! 您好啊!"</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>ES6添加了完整的Unicode支持，同时也添加了操作字符串的一些新方法，正则表达式也同样引入了许多功能。<br>模板字面量的添加使得我们在组合字符串与变量的时候变得更加容易拼接与操作。并且通过模板我们可以创建接收模板字面量片段作为参数的函数，可以使用它们来返回合适的字符串。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/js/stringAndRegExp/" data-id="ck4bd0sr5000dmou185f0ayng"
+        class="article-share-link">分享</a>
+      
+
+    </footer>
+
+  </div>
+
+  
+
+  
+  
+  
+
+  
+
+</article>
+    
+    <article id="es6-js/symbol" class="article article-type-es6" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2019/12/16/js/symbol/"
+    >符号（Symbol）与符号（Symbol）属性</a
+  >
+</h2>
+  
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2019/12/16/js/symbol/" class="article-date">
+  <time datetime="2019-12-16T12:48:06.000Z" itemprop="datePublished">2019-12-16</time>
+</a>
+      
+    </div>
+    
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+
+
+      
+
+      
+      <h1 id="符号（Symbol）与符号（Symbol）属性"><a href="#符号（Symbol）与符号（Symbol）属性" class="headerlink" title="符号（Symbol）与符号（Symbol）属性"></a>符号（Symbol）与符号（Symbol）属性</h1><p>在 JS 已有的基本类型之外，ES6 引入了一种新的基本数据类型： <strong>符号（<code>Symbol</code>）</strong> 。</p>
+<p><code>Symbol()</code> 函数会返回 <strong>Symbol</strong> 类型的值，该类型具有静态属性和静态方法。它的静态属性会暴露几个内建的成员对象；它的静态方法会暴露全局的 <strong>symbol</strong> 注册，且类似于内建对象类，但作为构造函数来说它并不完整，因为它不支持语法：<code>new Symbol()</code>。</p>
+<p>?&gt; 每个 <code>Symbol()</code> 返回的 <strong>symbol</strong> 值都是唯一的。一个 <strong>symbol</strong> 值能作为对象属性的标识符；这也是 <strong>symbol</strong>存在的意义。</p>
+<h3 id="创建符号值"><a href="#创建符号值" class="headerlink" title="创建符号值"></a>创建符号值</h3><p>符号没有字面量形式，这在 <strong>JS</strong> 的基本类型中是独一无二的。想要创建一个 <strong>symbol</strong> 值，我们可以使用全局函数 <strong>Symbol()</strong> 来创建。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> firstName = <span class="built_in">Symbol</span>()</span><br><span class="line"><span class="keyword">const</span> person = &#123;&#125;</span><br><span class="line"></span><br><span class="line">person[firstName] = <span class="string">'反芹菜联盟盟主'</span></span><br><span class="line"><span class="built_in">console</span>.log(person[firstName]) <span class="comment">// 反芹菜联盟盟主</span></span><br></pre></td></tr></table></figure>
+
+<p>通过上面的方法我们创建了一个名叫 <code>firstName</code> 的符号类型的变量，并将它作为了 <code>person</code> 对象的一个属性，而每次访问该属性都要使用这个符号值。</p>
+<h6 id="符号描述"><a href="#符号描述" class="headerlink" title="符号描述"></a>符号描述</h6><p><code>Symbol()</code> 函数还可以接受一个额外的参数用于描述符号值，但是该描述不能用来访问对应属性，但是可以用于调试。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> name = <span class="built_in">Symbol</span>(<span class="string">'name'</span>)</span><br><span class="line"><span class="keyword">const</span> person = &#123;&#125;</span><br><span class="line"></span><br><span class="line">person[name] = <span class="string">'反芹菜联盟盟主'</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person[name]) <span class="comment">// 反芹菜联盟盟主</span></span><br><span class="line"><span class="built_in">console</span>.log(name) <span class="comment">// Symbol(name)</span></span><br></pre></td></tr></table></figure>
+
+<p>符号的描述信息会被储存在内部属性 <code>[[Description]]</code> 中，当我们显式或者隐式调用时，该属性都会被读取。</p>
+<p>当我们使用 <code>console.log()</code> 打印 <code>name</code> 符号时， <code>console.log()</code> 就隐式调用了 <code>name</code> 变量的 <code>toString()</code> 方法了。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> name = <span class="built_in">Symbol</span>(<span class="string">'name'</span>)</span><br><span class="line"><span class="keyword">const</span> str = name.toString()</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(str)  <span class="comment">// Symbol(name)</span></span><br><span class="line"><span class="built_in">console</span>.log(name) <span class="comment">// Symbol(name)</span></span><br></pre></td></tr></table></figure>
+
+<p>?&gt; 除了使用 <code>toString()</code> 方法，目前还没有其他办法可以从代码中直接访问 <code>[[Description]]</code> 属性。</p>
+<h3 id="识别符号值"><a href="#识别符号值" class="headerlink" title="识别符号值"></a>识别符号值</h3><p>由于符号是基本类型的值，因此我们可以使用 <code>typeof</code> 运算符来判断一个变量是否为符号。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> symbol = <span class="built_in">Symbol</span>(<span class="string">'test symbol'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> symbol === <span class="string">'symbol'</span>) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="使用符号值"><a href="#使用符号值" class="headerlink" title="使用符号值"></a>使用符号值</h3><p>我们可以再任意能够使用 <strong>需计算属性名</strong> 的场合使用符号。此外还可以在 <code>Object.defineProperty()</code> 或者 <code>Object.defineProperties()</code> 调用中使用它。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> name = <span class="built_in">Symbol</span>(<span class="string">'name'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用需计算属性名</span></span><br><span class="line"><span class="keyword">const</span> person = &#123;</span><br><span class="line">    [name]: <span class="string">'反芹菜联盟盟主1'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 让该属性变为只读</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(person, name, &#123;</span><br><span class="line">    writable: <span class="literal">false</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> restName = <span class="built_in">Symbol</span>(<span class="string">'name'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">Object</span>.defineProperties(person, &#123;</span><br><span class="line">    [restName]: &#123;</span><br><span class="line">        value: <span class="string">'反芹菜联盟盟主2'</span>,</span><br><span class="line">        writable: <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(person[name])       <span class="comment">// 反芹菜联盟盟主1</span></span><br><span class="line"><span class="built_in">console</span>.log(person[restName])   <span class="comment">// 反芹菜联盟盟主2</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty" target="_blank" rel="noopener">Object.defineProperty()</a> 方法会直接在一个对象上定义一个新属性，或者修改一个对象的现有属性， 并返回这个对象。</p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperties" target="_blank" rel="noopener">Object.defineProperties()</a> 方法直接在一个对象上定义新的属性或修改现有属性，并返回该对象。</p>
+</blockquote>
+<h3 id="共享符号值"><a href="#共享符号值" class="headerlink" title="共享符号值"></a>共享符号值</h3><p>假如我们想要在不同的代码段中使用同一个 <strong>符号值</strong> ，例如在两个不同的对象类型中使用同一个 <strong>符号属性</strong> ，用来表示一个唯一标识符。为此，ES6 为我们提供了 <strong>“全局符号注册表”</strong> 供我们在任意时间点进行访问。</p>
+<p>想要创建 <strong>共享符号值</strong> ，应该使用 <code>Symbol.for()</code> 方法而不是 <code>Symbol()</code> 方法。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> id = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"><span class="keyword">const</span> obj = &#123;&#125;</span><br><span class="line"></span><br><span class="line">obj[id] = <span class="number">123</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(obj[id]) <span class="comment">// 123</span></span><br><span class="line"><span class="built_in">console</span>.log(id)      <span class="comment">// Symbol(id)</span></span><br></pre></td></tr></table></figure>
+
+<p>?&gt; <code>Symbol.for()</code> 方法仅接受单个字符串类型的参数，作为目标符号值的标识符，同时此参数也会成为该符号的描述信息。</p>
+<p><code>Symbol.for()</code> 方法创建前，会首先搜索 <strong>全局符号注册表</strong> ，看看是否存在一个键值为 <code>id</code> 的 <strong>符号值</strong> 。如果存在就会返回已存在的 <strong>符号值</strong> ；否则创建一个新的 <strong>符号值</strong> 。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> id1 = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    [id1]: <span class="number">123</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(obj[id1]) <span class="comment">// 123</span></span><br><span class="line"><span class="built_in">console</span>.log(id1)      <span class="comment">// Symbol(id)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> id2 = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(id1 === id2) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(obj[id2]) <span class="comment">// 123</span></span><br><span class="line"><span class="built_in">console</span>.log(id2)      <span class="comment">// Symbol(id)</span></span><br></pre></td></tr></table></figure>
+
+<p>在上面的例子中，<code>id1</code> 和 <code>id2</code> 包含同一个 <strong>符号值</strong> ，在第一次调用 <code>Symbol.for(&#39;id&#39;)</code> 时创建了这个 <strong>符号值</strong> ，而第二次调用在 <strong>全局符号注册表</strong> 检测到此 <strong>符号值</strong> 以创建，则返回了已存在的 <strong>符号值</strong> 。</p>
+<h3 id="Symbol-keyFor"><a href="#Symbol-keyFor" class="headerlink" title="Symbol.keyFor()"></a>Symbol.keyFor()</h3><p>从 <strong>全局symbol注册表</strong> 中，根据 <strong>符号值</strong> 检索出对应的键值。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> id = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Symbol</span>.keyFor(id)) <span class="comment">// id</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="符号值的转换"><a href="#符号值的转换" class="headerlink" title="符号值的转换"></a>符号值的转换</h3><p>类型转换是 <strong>JS</strong> 语言重要的一部分，能够非常灵活地将一种数据类型转换为另一种。然而符号类型在进行转换时非常不灵活，因为其他类型缺乏与符号值的合理等价，尤其是符号值无法被转换为字符串或数值。</p>
+<p>因为符号值无法被转换为字符串或数值，也就以为着当我们把 <strong>符号（<code>Symbol</code>）</strong> 与字符串进行连接或者对其使用数学运算符都会导致其发生错误。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> id = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误：Cannot convert a Symbol value to a string</span></span><br><span class="line"><span class="keyword">const</span> str = id + <span class="string">''</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> symbol = <span class="built_in">Symbol</span>.for(<span class="string">'number'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 抛出错误：Cannot convert a Symbol value to a number</span></span><br><span class="line"><span class="keyword">const</span> num = symbol + <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>?&gt; 虽然说不能够对 <strong>符号</strong> 使用数学运算符，不过使用逻辑运算符是不会导致错误的，因为符号值在逻辑运算符中会被认为等价于 <code>true</code> （就像 <strong>JS</strong> 中其他的非空值一样）。</p>
+<h3 id="检索符号属性"><a href="#检索符号属性" class="headerlink" title="检索符号属性"></a>检索符号属性</h3><p>想要检索对象的所有属性名称可以使用 <code>Object.keys()</code> 与 <code>Object.getOwnPropertyNames()</code>。</p>
+<blockquote>
+<p><code>Object.keys()</code> 方法会返回一个由一个给定对象的自身可枚举属性组成的数组，数组中属性名的排列顺序和使用 <code>for...in</code> 循环遍历该对象时返回的顺序一致 。如果对象的键-值都不可枚举，那么将返回由键组成的数组。</p>
+<p><code>Object.getOwnPropertyNames()</code>方法返回一个由指定对象的所有自身属性的属性名（包括不可枚举属性但不包括Symbol值作为名称的属性）组成的数组。</p>
+</blockquote>
+<p>上面的两种方法都不能返回符号类型的属性，以保持它们在 <strong>ES5</strong>的功能不发生变化。为了让我们可以检索对象的符号类型属性，<strong>ES6</strong> 新增了 <code>Object.getOwnPropertySymbols()</code> 方法。</p>
+<blockquote>
+<p><code>Object.getOwnPropertySymbols()</code> 方法返回一个给定对象自身的所有 Symbol 属性的数组。</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> symbol = <span class="built_in">Symbol</span>.for(<span class="string">'id'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    a: <span class="string">'aaa'</span>,</span><br><span class="line">    [symbol]: <span class="number">123</span>,</span><br><span class="line">    b: <span class="string">'bbb'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr = <span class="built_in">Object</span>.getOwnPropertySymbols(obj)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr.length)  <span class="comment">// 1</span></span><br><span class="line"><span class="built_in">console</span>.log(arr[<span class="number">0</span>])      <span class="comment">// Symbol(id)</span></span><br><span class="line"><span class="built_in">console</span>.log(obj[arr[<span class="number">0</span>]]) <span class="comment">// 123</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的代码中 <code>obj</code> 对象有2个普通属性和一个 <code>Symbol</code> 属性，我们使用 <code>Object.getOwnPropertySymbols()</code> 方法返回的数组，则只包含了它的符号值。</p>
+<p>所有对象初始化情况下都不包含任何自由符号类型属性，但对象可以从它们的原型上继承符合类型属性。<strong>ES6</strong> 预定义了一些此类属性，它们被称为“知名符合”。</p>
+<h3 id="使用知名符号暴露内部方法"><a href="#使用知名符号暴露内部方法" class="headerlink" title="使用知名符号暴露内部方法"></a>使用知名符号暴露内部方法</h3><p><strong>ES6</strong> 允许使用符号类型的原型属性来定义某些对象的基础行为。</p>
+<p><strong>ES6</strong> 定义了“知名符号”来代表 JS 中一些公共行为，而这些行为此前被认为只能是内部操作。<br>每一个知名符号都对应全局 <code>Symbol</code> 对象的一个属性，例如 <code>Symbol.create</code> 。</p>
+<p>这些知名符号下面会介绍一部分：</p>
+<p>迭代 <code>symbols</code></p>
+<blockquote>
+<p><code>Symbol.iterator</code>：一个返回一个对象默认迭代器的方法。被 <code>for...of</code> 使用。</p>
+<p><code>Symbol.asyncIterator</code>: 一个返回对象默认的异步迭代器的方法。被 for await of 使用。</p>
+</blockquote>
+<p>正则表达式 symbols</p>
+<blockquote>
+<p><code>Symbol.match</code>：一个用于对字符串进行匹配的方法，也用于确定一个对象是否可以作为正则表达式使用。被 <code>String.prototype.match()</code> 使用。</p>
+<p><code>Symbol.replace</code>：一个替换匹配字符串的子串的方法. 被 <code>String.prototype.replace()</code> 使用。</p>
+<p><code>Symbol.search</code>： 一个返回一个字符串中与正则表达式相匹配的索引的方法。被<code>String.prototype.search()</code> 使用。</p>
+<p><code>Symbol.split</code>： 一个在匹配正则表达式的索引处拆分一个字符串的方法.。被 <code>String.prototype.split()</code> 使用。</p>
+</blockquote>
+<p>其他 symbols</p>
+<blockquote>
+<p><code>Symbol.hasInstance</code>： 一个确定一个构造器对象识别的对象是否为它的实例的方法。被 <code>instanceof</code> 使用。</p>
+<p><code>Symbol.isConcatSpreadable</code>： 一个布尔值，表明一个对象是否应该 <code>flattened</code> 为它的数组元素。被 <code>Array.prototype.concat()</code> 使用。</p>
+<p><code>Symbol.unscopables</code>： 拥有和继承属性名的一个对象的值被排除在与环境绑定的相关对象外。</p>
+<p><code>Symbol.species</code>： 一个用于创建派生对象的构造器函数。</p>
+<p><code>Symbol.toPrimitive</code>： 一个将对象转化为基本数据类型的方法。</p>
+<p><code>Symbol.toStringTag</code>：用于对象的默认描述的字符串值。被 <code>Object.prototype.toString()</code> 使用。</p>
+</blockquote>
+<h6 id="Symbol-hasInstance"><a href="#Symbol-hasInstance" class="headerlink" title="Symbol.hasInstance"></a><code>Symbol.hasInstance</code></h6><p>每个函数都具有一个 <code>Symbol.hasInstance</code> 方法，用来判断指定对象是否为本函数的一个实例。这个方法定义在 <code>Function.prototype</code> 上，因此所有函数都继承了面对 <code>instanceof</code> 运算符时的默认行为。 <code>Symbol.hasInstance</code> 属性自身是不可写入、不可配置、不可枚举的，从而保证它不会被错误地重写。</p>
+<p><code>Symbol.hasInstance</code> 方法只接受单个参数，即需要检测的值。如果该值是本函数的一个实例，则返回 <code>true</code>。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">([] <span class="keyword">instanceof</span> <span class="built_in">Array</span>) <span class="comment">// true</span></span><br><span class="line"><span class="comment">// 上面的代码等价于：</span></span><br><span class="line"><span class="built_in">Array</span>[<span class="built_in">Symbol</span>.hasInstance]([]) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>ES6 从本质上将 <code>instanceof</code> 运算符重定义为上述方法调用的简写语法，这样使用 <code>instanceof</code> 便会触发一次方法调用，实际上允许你改变该运算符的工作。</p>
+<p>我们可以自定义一个函数，使得任意对象都不会被判断为该函数的一个实例。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Fun</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// no thing</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注释此段代码则结果为 true</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(Fun, <span class="built_in">Symbol</span>.hasInstance, &#123;</span><br><span class="line">    value(v) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> obj = <span class="keyword">new</span> Fun()</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(obj <span class="keyword">instanceof</span> Fun) <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>Object.defineProperty()</code> 方法会直接在一个对象上定义一个新属性，或者修改一个对象的现有属性， 并返回这个对象。</p>
+</blockquote>
+<h6 id="Symbol-isConcatSpreadable"><a href="#Symbol-isConcatSpreadable" class="headerlink" title="Symbol.isConcatSpreadable"></a><code>Symbol.isConcatSpreadable</code></h6><p>内置的 <code>Symbol.isConcatSpreadable</code> 符号用于配置某对象作为 <code>Array.prototype.concat()</code> 方法的参数时是否展开其数组元素。</p>
+<p>默认情况下 <code>Array.prototype.concat()</code> 会展开自身元素连接到结果中。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr1 = [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> ]</span><br><span class="line"><span class="keyword">const</span> arr2 = [ <span class="number">4</span>, <span class="number">5</span> ]</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr3 = arr1.concat(arr2)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr3) <span class="comment">// [ 1, 2, 3, 4, 5 ]</span></span><br></pre></td></tr></table></figure>
+
+<p>当我们设置了 <code>Symbol.isConcatSpreadable</code> 属性为 <code>false</code> 时，如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr1 = [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> ]</span><br><span class="line"><span class="keyword">const</span> arr2 = [ <span class="number">4</span>, <span class="number">5</span> ]</span><br><span class="line"></span><br><span class="line">arr2[<span class="built_in">Symbol</span>.isConcatSpreadable] = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr3 = arr1.concat(arr2)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr3) <span class="comment">// [ 1, 2, 3, [ 4, 5 ] ]</span></span><br></pre></td></tr></table></figure>
+
+<p>对于类数组 (array-like)对象，默认不展开。期望展开其元素用于连接，需要设置 <code>Symbol.isConcatSpreadable</code> 为 <code>true</code> ：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr1 = [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> ]</span><br><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.isConcatSpreadable]: <span class="literal">true</span>,</span><br><span class="line">    length: <span class="number">2</span>,</span><br><span class="line">    <span class="number">0</span>: <span class="number">4</span>,</span><br><span class="line">    <span class="number">1</span>: <span class="number">5</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr3 = arr1.concat(obj)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr3) <span class="comment">// [ 1, 2, 3, 4, 5 ]</span></span><br></pre></td></tr></table></figure>
+
+<p>设置 <code>Symbol.isConcatSpreadable</code> 为 <code>false</code>，如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr1 = [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> ]</span><br><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.isConcatSpreadable]: <span class="literal">false</span>,</span><br><span class="line">    length: <span class="number">2</span>,</span><br><span class="line">    <span class="number">0</span>: <span class="number">4</span>,</span><br><span class="line">    <span class="number">1</span>: <span class="number">5</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr3 = arr1.concat(obj)</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr3) <span class="comment">// [ 1, 2, 3, &#123; 0: 4, 1: 5, length: 2, Symbol(Symbol.isConcatSpreadable): false &#125;]</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Symbol-toPrimitive"><a href="#Symbol-toPrimitive" class="headerlink" title="Symbol.toPrimitive"></a>Symbol.toPrimitive</h6><p><code>Symbol.toPrimitive</code> 是一个内置的 <code>Symbol</code> 值，它是作为对象的函数值属性存在的，当一个对象转换为对应的原始值时，会调用此函数。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.toPrimitive]: <span class="function"><span class="keyword">function</span>(<span class="params">hint</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (hint == <span class="string">'number'</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">42</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(obj / <span class="number">2</span>) <span class="comment">// 21</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Symbol-toStringTag"><a href="#Symbol-toStringTag" class="headerlink" title="Symbol.toStringTag"></a>Symbol.toStringTag</h6><p><code>Symbol.toStringTag</code> 是一个内置 <code>symbol</code>，它通常作为对象的属性键使用，对应的属性值应该为字符串类型，这个字符串用来表示该对象的自定义类型标签，通常只有内置的 <code>Object.prototype.toString()</code> 方法会去读取这个标签并把它包含在自己的返回值里。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Cat</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// no thing</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Cat.prototype[<span class="built_in">Symbol</span>.toStringTag] = <span class="string">"Cat"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> cat = <span class="keyword">new</span> Cat()</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(cat.toString())</span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.prototype.toString.call(cat))</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>除非进行了特殊指定，否则所有对象都会从 <code>Object.prototype</code> 继承 <code>Symbol.toStringTag</code> 属性，其默认的属性值是字符串 <code>&quot;Object&quot;</code></p>
+</blockquote>
+<h6 id="Symbol-match"><a href="#Symbol-match" class="headerlink" title="Symbol.match"></a>Symbol.match</h6><p><code>Symbol.match</code> 指定了匹配的是正则表达式而不是字符串。 <code>String.prototype.match()</code> 方法会调用此函数。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = <span class="regexp">/foo/</span></span><br><span class="line"></span><br><span class="line">reg[<span class="built_in">Symbol</span>.match] = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'/foo/'</span>.startsWith(reg)) <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'/123foo123/'</span>.endsWith(reg)) <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<p>如果将 <code>Symbol.match</code> 置为 <code>false</code>，使用 <code>match</code> 属性的表达式检查会认为该象不是正则表达式对象。<code>startsWith</code> 和 <code>endsWith</code> 方法将不会抛出 <code>TypeError</code>。</p>
+<p>我们也可以使用 <code>Symbol.match</code> 定义一个正则表达式对象。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.match]: <span class="function"><span class="keyword">function</span>(<span class="params">value</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.length &gt; <span class="number">6</span> ? <span class="string">'长度大于6'</span> : <span class="string">'长度小于6'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> len1 = <span class="string">'Hello world'</span></span><br><span class="line"><span class="keyword">const</span> len2 = <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(len1.match(reg)) <span class="comment">// 长度大于6</span></span><br><span class="line"><span class="built_in">console</span>.log(len2.match(reg)) <span class="comment">// 长度小于6</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Symbol-replace"><a href="#Symbol-replace" class="headerlink" title="Symbol.replace"></a>Symbol.replace</h6><p><code>Symbol.replace</code> 这个属性指定了当一个字符串替换所匹配字符串时所调用的方法。<code>String.prototype.replace()</code> 方法会调用此方法。</p>
+<p>我们也可以使用 <code>Symbol.replace</code> 定义一个正则表达式对象。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.replace]: <span class="function"><span class="keyword">function</span>(<span class="params">value, replacement</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.length === <span class="number">11</span> ? replacement + value.substring(<span class="number">11</span>) : value</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> len1 = <span class="string">'Hello world'</span></span><br><span class="line"><span class="keyword">const</span> len2 = <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(len1.replace(reg, <span class="string">'12345'</span>)) <span class="comment">// 12345</span></span><br><span class="line"><span class="built_in">console</span>.log(len2.replace(reg, <span class="string">'12345'</span>)) <span class="comment">// Hello</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Symbol-search"><a href="#Symbol-search" class="headerlink" title="Symbol.search"></a>Symbol.search</h6><p><code>Symbol.search</code> 指定了一个搜索方法，这个方法接受用户输入的正则表达式，返回该正则表达式在字符串中匹配到的下标，这个方法由以下的方法来调用 <code>String.prototype.search()</code>。</p>
+<p>我们也可以使用 <code>Symbol.search</code> 定义一个正则表达式对象。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.search]: <span class="function"><span class="keyword">function</span>(<span class="params">value</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.length &gt; <span class="number">10</span> ? <span class="literal">true</span> : <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> len1 = <span class="string">'Hello world'</span></span><br><span class="line"><span class="keyword">const</span> len2 = <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(len1.search(reg)) <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(len2.search(reg)) <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Symbol-split"><a href="#Symbol-split" class="headerlink" title="Symbol.split"></a>Symbol.split</h6><p><code>Symbol.split</code> 指向 一个正则表达式的索引处分割字符串的方法。 这个方法通过 <code>String.prototype.split()</code> 调用。</p>
+<p>我们也可以使用 <code>Symbol.split</code> 定义一个正则表达式对象。如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = &#123;</span><br><span class="line">    [<span class="built_in">Symbol</span>.split]: <span class="function"><span class="keyword">function</span>(<span class="params">value</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.length &gt; <span class="number">10</span> ? [] : [value]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> len1 = <span class="string">'Hello world'</span></span><br><span class="line"><span class="keyword">const</span> len2 = <span class="string">'Hello'</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(len1.split(reg)) <span class="comment">// []</span></span><br><span class="line"><span class="built_in">console</span>.log(len2.split(reg)) <span class="comment">// [ Hello ]</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>符号（<code>Symbol</code>）是 <strong>JS</strong> 新引入的基本类型值，可以使用它创建不可枚举的属性，并且这些属性不使用符号的情况下是无法访问的。</p>
+<p>虽然符号类型不可以创建真正的私有属性，但它们很难被修改，当我们创建一个不想被用户修改的方法时，可以去使用符号。</p>
+<p>为符号添加描述，可以更加容易判断它的作用。使用全局符号注册，允许我们在不同的代码段使用同一个符号值。</p>
+<p><code>Object.keys()</code> 或 <code>Object.getOwnPropertyNames()</code> 不会返回符号值，因此 ES6 新增了一个<code>Object.getOwnPropertySymbols()</code> 方法，允许检索符号类型的对象属性。而你依然可以使用 <code>Object.defineProperty()</code> 与 <code>Object.defineProperties()</code> 方法对符号类型的属性进行修改。</p>
+<p>“知名符号”使用了全局符号常量（例如 <code>Symbol.hasInstance</code> ），为常规对象定义了一些功<br>能，而这些功能原先仅限内部使用。这些符号按规范使用 <code>Symbol</code>. 的前缀，允许开发者通过<br>多种方式去修改常规对象的行为/<em>不过一般情况下也用不到这些方法，个人觉得了解一下即可</em>/。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/16/js/symbol/" data-id="ck4bd0srf000emou1awzsdbat"
+        class="article-share-link">分享</a>
+      
+
+    </footer>
+
+  </div>
+
+  
+
+  
+  
+  
+
+  
+
+</article>
+    
+  </article>
+  
+
+  
+  <nav class="page-nav">
+    
+    <a class="extend prev" rel="prev" href="/">上一页</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
+  
+</section>
+</div>
+
+      <footer>
+  
+</footer>
+
+
+<!-- <footer class="footer">
+  <div class="outer">
+    <ul class="list-inline">
+      <li>
+        &copy;
+        2019
+        
+      </li>
+      <li>
+        
+      </li>
+    </ul>
+    <ul class="list-inline">
+      <li>
+        
+        
+        <ul class="list-inline">
+  <li>PV:<span id="busuanzi_value_page_pv"></span></li>
+  <li>UV:<span id="busuanzi_value_site_uv"></span></li>
+</ul>
+        
+      </li>
+      <li> -->
+        <!-- cnzz统计 -->
+        <!-- 
+      </li>
+    </ul>
+  </div>
+</footer> -->
+    <div class="to_top">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+      </div>
+    </main>
+    
+      <aside class="sidebar">
+        
+        <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <!-- <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt=""></a>
+  </div> -->
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">目录</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+      </aside>
+      
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+
+<script>
+  var ayerConfig = {
+    mathjax: true
+  }
+</script>
+
+
+<script src="/js/ayer.js"></script>
+
+
+
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.6/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  </div>
+</body>
+
+</html>
